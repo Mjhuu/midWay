@@ -10,7 +10,8 @@
     "egg-sequelize": "^5.2.2",
     "midway": "^1.0.0",
     "mysql2": "^2.1.0",
-    "svg-captcha": "^1.4.0"
+    "svg-captcha": "^1.4.0",
+    "uuidv4": "^6.2.0"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.7",

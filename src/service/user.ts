@@ -1,5 +1,5 @@
 import {Context, inject, provide} from 'midway';
-import {IUserService, IUserOptions, IUserResult, LoginOptions, ErrorResult, SuccessResult} from '../interface';
+import {IUserService, IUserOptions, LoginOptions, ErrorResult, SuccessResult} from '../interface';
 import md5 from 'blueimp-md5'
 
 @provide('userService')
@@ -7,13 +7,24 @@ export class UserService implements IUserService {
   @inject()
   ctx: Context;
 
-  async getUser(options: IUserOptions): Promise<IUserResult> {
-    return {
-      id: options.id,
-      username: 'mockedName',
-      phone: '12345678901',
-      email: 'xxx.xxx@xxx.com',
-    };
+  async getUser(options: IUserOptions): Promise<ErrorResult | SuccessResult> {
+    let {id} = options;
+    let data = await this.ctx.model.Employee.findByPk(id, {
+      attributes: {exclude: ['password']}
+    });
+    if(!data){
+      return {status: 500, msg: '用户不存在'}
+    }
+    let jobData = await this.ctx.model.Job.findByPk(data.job_id, {
+      attributes: ['job_id', 'job_name', 'department_id']
+    });
+    let departmentInfo = {}
+    if(jobData){
+      departmentInfo = await this.ctx.model.Department.findByPk(jobData.department_id, {
+        attributes: ['department_id', 'department_name']
+      });
+    }
+    return {status: 0, msg: '用户信息获取成功', result: {userInfo: data, jobInfo: jobData, departmentInfo}}
   }
 
   async login(options: LoginOptions): Promise<ErrorResult | SuccessResult> {
@@ -33,6 +44,6 @@ export class UserService implements IUserService {
     if(!data){
       return {status: 500, msg: '用户名或密码错误'}
     }
-    return {status: 200, msg: '登录成功', result: {userInfo: data}}
+    return {status: 0, msg: '登录成功', result: {userInfo: data}}
   }
 }

@@ -9,23 +9,23 @@ export interface LoginOptions {
   password: string;
   captcha: string;
 }
+export interface AddDepartmentOptions {
+  department_name: string;
+  department_description: string;
+  creator_id: string;
+}
 
 /**
  * @description User-Service response
  */
-export interface IUserResult {
-  id: number;
-  username: string;
-  phone: string;
-  email?: string;
-}
+
 export interface ErrorResult {
   status: 500;
   msg: string;
   result?: object
 }
 export interface SuccessResult {
-  status: 200,
+  status: 200 | 0,
   msg: string;
   result?: object
 }
@@ -34,6 +34,6 @@ export interface SuccessResult {
  * @description User-Service abstractions
  */
 export interface IUserService {
-  getUser(options: IUserOptions): Promise<IUserResult>;
+  getUser(options: IUserOptions): Promise<SuccessResult | ErrorResult>;
   login(options: LoginOptions): Promise<SuccessResult | ErrorResult>
 }

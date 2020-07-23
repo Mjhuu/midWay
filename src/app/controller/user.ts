@@ -1,5 +1,5 @@
 import { Context, controller, get, inject, provide, post } from 'midway';
-import {IUserService, IUserResult, LoginOptions} from '../../interface';
+import {IUserService, LoginOptions} from '../../interface';
 
 @provide()
 @controller('/user')
@@ -21,7 +21,7 @@ export class UserController {
   @get('/:id')
   async getUser(): Promise<void> {
     const id: number = this.ctx.params.id;
-    const user: IUserResult = await this.service.getUser({id});
-    this.ctx.body = {success: true, message: 'OK', data: user};
+    const user = await this.service.getUser({id});
+    this.ctx.body = user;
   }
 }
