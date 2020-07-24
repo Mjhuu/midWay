@@ -1,7 +1,59 @@
 import {Context, inject, controller, get, post, del, put, provide,} from 'midway';
-import {AddDepartmentOptions, ErrorResult, SuccessResult} from "../../interface";
+import {AddDepartmentOptions, ErrorResult, IUserService, SuccessResult} from "../../interface";
 import { uuid } from 'uuidv4';
 let svgCaptcha = require('svg-captcha');
+const path = require('path');
+const fs = require('fs');
+// 故名思意 异步二进制 写入流
+const awaitWriteStream = require('await-stream-ready').write;
+// 管道读入一个虫洞。
+const sendToWormhole = require('stream-wormhole');
+const dayjs = require('dayjs');
+const md5 = require('md5-nodejs');
+const nodeMailer = require('nodemailer');
+
+function getCode(length) {
+  let codeArr = [1, 3, 4, 2, 6, 7, 5, 9, 8, 0];
+  let codeLength = length;
+  let code = '';
+  for (let i = 0; i < codeLength; i++) {
+    code += codeArr[parseInt(String(Math.random() * codeArr.length))];
+  }
+  return code;
+}
+
+let transporter= nodeMailer.createTransport({
+  host: 'smtp.qq.com',//邮箱服务的主机，如smtp.qq.com
+  port: 465,//对应的端口号
+  //开启安全连接
+  // secure: false,
+  secureConnection: true,
+  //用户信息
+  auth:{
+    user: '1441901570@qq.com',
+    pass: 'nyhcoegvmyhmhgei'
+  }
+});
+
+export const sendEmail = (toEmail, title = '', text = '', html = '') =>{
+  return new Promise((resolve, reject) => {
+    let mailOptions={
+      from: '纬领工作平台 <1441901570@qq.com>',
+      to: toEmail,
+      subject: title,
+      text,
+      html
+    };
+    transporter.sendMail(mailOptions,(error,info)=>{
+      if(error)
+        return reject(error);
+      resolve({
+        Message: info.messageId,
+        sent: info.response
+      });
+    });
+  });
+};
 
 @provide()
 @controller('/')
@@ -9,6 +61,9 @@ export class HomeController {
 
   @inject()
   ctx: Context;
+
+  @inject('userService')
+  service: IUserService;
 
   @get('/')
   async index() {
@@ -1219,6 +1274,125 @@ export class HomeController {
     data = await this.ctx.model.Notice.create({
       reminder_id, message, notice_id: uuid().replace(/\-/g, '')
     });
-    this.ctx.body = {status: 0, msg: '评语保存成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '提醒成功'} as SuccessResult
   }
+
+  @post('/uploadFile')
+  async uploadFile(){
+    const { ctx } = this;
+    // 获取文件流
+    const stream = await ctx.getFileStream();
+    let {userId} = ctx.query;
+    // 基础的目录
+    const uploadBasePath = './../public/upload';
+    // 生成文件名
+    const filename = `${Date.now()}${Number.parseInt(String(Math.random() * 1000))}${path.extname(stream.filename).toLocaleLowerCase()}`;
+    // 生成文件夹
+    const dirname = (userId ? userId : 'null') + '/' + dayjs(Date.now()).format('YYYY/MM/DD');
+    function mkdirsSync(dirname) {
+      if (fs.existsSync(dirname)) {
+        return true;
+      }
+      if (mkdirsSync(path.dirname(dirname))) {
+        fs.mkdirSync(dirname);
+        return true;
+      }
+    }
+    mkdirsSync(path.join(__dirname,uploadBasePath, dirname));
+    // 生成写入路径
+    const target = path.join(__dirname, uploadBasePath, dirname, filename);
+    // 写入流
+    const writeStream = fs.createWriteStream(target);
+    try {
+      // 异步把文件流 写入
+      await awaitWriteStream(stream.pipe(writeStream));
+    } catch (err) {
+      // 如果出现错误，关闭管道
+      await sendToWormhole(stream);
+      ctx.body = {
+        msg: '文件上传失败',
+        result: err,
+        status: 500,
+      } as ErrorResult;
+    }
+    ctx.body = {
+      result: {
+        url: path.join('/upload', dirname, filename)
+      },
+      msg: '文件上传成功',
+      fields: stream.fields,
+      status: 0,
+    } as SuccessResult;
+  }
+
+  @post('/login')
+  async login(){
+    let {username, password, verifycode: captcha} = this.ctx.request.body;
+    if(!this.ctx.session.captcha){
+      return this.ctx.body = {
+        msg: '验证码已过期',
+        status: 500,
+      } as ErrorResult;
+    }
+    if(captcha.toUpperCase() !== this.ctx.session.captcha.toUpperCase()){
+      return this.ctx.body = {
+        msg: '验证码错误',
+        status: 500,
+      } as ErrorResult;
+    }
+    password = md5(password);
+    let data = await this.ctx.model.Employee.findOne({
+      where: {username, password}
+    });
+    if(!data){
+      return this.ctx.body = {
+        msg: '用户名或密码错误',
+        status: 500,
+      } as ErrorResult;
+    }
+    const user = await this.service.getUser({id: data.user_id});
+    this.ctx.body = user;
+  }
+
+  @post('/sendCode')
+  async sendCode(){
+    try {
+      let {email: toEmail} = this.ctx.request.body;
+      let code = getCode(6);
+      console.log(code);
+      let data = await sendEmail(toEmail, 'WEBLINKON验证码', `【纬领工作平台平台】您的邮箱验证码是：${code}。验证码有效期：1分钟。工作人员不会向您索要，索要验证码的都是骗子，如非本人操作请忽略。`);
+      this.ctx.session.yzm = code; //设置session captcha 为生成的验证码字符串
+      this.ctx.body = {
+        status: 0,
+        msg: '验证码发送成功',
+        result: data
+      } as SuccessResult
+    }catch (e) {
+      this.ctx.body = {
+        msg: '邮箱发送失败',
+        status: 500,
+        result: e
+      } as ErrorResult;
+    }
+  }
+
+  @post('/sendEmail')
+  async sendEmail(){
+    try {
+      let {email: toEmail, title, text, html} = this.ctx.request.body;
+      let data = await sendEmail(toEmail, title, text, html);
+      this.ctx.body = {
+        status: 0,
+        msg: '邮箱发送成功',
+        result: data
+      } as SuccessResult
+    }catch (e) {
+      this.ctx.body = {
+        msg: '邮箱发送失败',
+        status: 500,
+        result: e
+      } as ErrorResult;
+    }
+  }
+
 }

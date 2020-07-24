@@ -4,12 +4,16 @@
   "description": "{{description}}",
   "private": true,
   "dependencies": {
-    "blueimp-md5": "^2.16.0",
+    "await-stream-ready": "^1.0.1",
+    "dayjs": "^1.8.30",
     "egg-cors": "^2.2.3",
     "egg-scripts": "^2.10.0",
     "egg-sequelize": "^5.2.2",
+    "md5-nodejs": "^1.0.3",
     "midway": "^1.0.0",
     "mysql2": "^2.1.0",
+    "nodemailer": "^6.4.10",
+    "stream-wormhole": "^1.1.0",
     "svg-captcha": "^1.4.0",
     "uuidv4": "^6.2.0"
   },

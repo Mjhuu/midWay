@@ -36,6 +36,12 @@ export default (appInfo: EggAppInfo) => {
       updatedAt: "updatedAt", // 自定义时间戳
     },
   };
+  config.static = {
+    prefix: '/',
+  };
+  config.multipart = {
+    fileSize: '200mb', // 默认大小为10Mb
+  };
   config.session = {
     key: 'WEBLINKON_SESS',
     maxAge: 60 * 1000,  // 1m
