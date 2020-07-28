@@ -5,6 +5,10 @@ export default {
     enable: true,
     package: 'egg-sequelize',
   },
+  nunjucks: {
+    enable: true,
+    package: 'egg-view-nunjucks',
+  },
   cors: {
     enable: true,
     package: 'egg-cors',

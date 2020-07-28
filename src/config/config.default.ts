@@ -1,4 +1,5 @@
 import { EggAppConfig, EggAppInfo, PowerPartial } from 'midway';
+const fs = require('fs');
 
 export type DefaultConfig = PowerPartial<EggAppConfig>
 
@@ -7,10 +8,19 @@ export default (appInfo: EggAppInfo) => {
 
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_{{keys}}';
-
+  config.siteFile = {
+    '/favicon.ico': fs.readFileSync('favicon.ico'),
+  };
   // add your config here
   config.middleware = [
+    'jwt'
   ];
+  config.view = {
+    defaultViewEngine: 'nunjucks',
+    mapping: {
+      '.html': 'nunjucks',
+    }
+  };
   config.security = {
     csrf: {
       enable: false,
@@ -23,13 +33,13 @@ export default (appInfo: EggAppInfo) => {
   };
   config.sequelize = {
     dialect: 'mysql',
-    host: '192.168.0.70',
+    host: '192.168.0.79',
     port: 3306,
     username: "root",
-    password: '123456',
+    password: 'itnihao',
     database: 'work',
     timezone: '+08:00', //东八时区
-    logging: true, // 不打印SQL日志
+    logging: false, // 不打印SQL日志
     define: {
       timestamps: true,
       createdAt: "createdAt",  //自定义时间戳
@@ -47,6 +57,13 @@ export default (appInfo: EggAppInfo) => {
     maxAge: 60 * 1000,  // 1m
     httpOnly: false,
     encrypt: true,
+  };
+  config.cluster = {
+    listen: {
+      path: '',
+      port: 7003,
+      hostname: '0.0.0.0',
+    }
   };
   return config;
 };

@@ -1,6 +1,7 @@
 import {Context, inject, controller, get, post, del, put, provide,} from 'midway';
 import {AddDepartmentOptions, ErrorResult, IUserService, SuccessResult} from "../../interface";
 import { uuid } from 'uuidv4';
+import {Jwt} from './../jwt'
 let svgCaptcha = require('svg-captcha');
 const path = require('path');
 const fs = require('fs');
@@ -11,6 +12,7 @@ const sendToWormhole = require('stream-wormhole');
 const dayjs = require('dayjs');
 const md5 = require('md5-nodejs');
 const nodeMailer = require('nodemailer');
+
 
 function getCode(length) {
   let codeArr = [1, 3, 4, 2, 6, 7, 5, 9, 8, 0];
@@ -67,7 +69,7 @@ export class HomeController {
 
   @get('/')
   async index() {
-    this.ctx.body = `纬领安全工作平台api`;
+    await this.ctx.render('index')
   }
 
   // 获取验证码
@@ -1201,7 +1203,7 @@ export class HomeController {
 
   @post('/week')
   async addWeekEvaluate(){
-    let {score, evaluate, startweekdate, endweekdate, evaluator_id, evaluated_id} = this.ctx.request.body;
+    let {score = 5, evaluate = '', startweekdate, endweekdate, evaluator_id, evaluated_id, leader_next_week_plan = '', myself_next_week_plan = '', weekly_summary = ''} = this.ctx.request.body;
     startweekdate = new Date(startweekdate);
     endweekdate = new Date(endweekdate);
     let data = await this.ctx.model.Week.findOne({
@@ -1210,15 +1212,19 @@ export class HomeController {
       }
     });
     if(data){
-      data.score = score;
-      data.evaluate = evaluate;
+      if(score) data.score = score;
+      if(evaluate) data.evaluate = evaluate;
+      if(leader_next_week_plan) data.leader_next_week_plan = leader_next_week_plan;
+      if(myself_next_week_plan) data.myself_next_week_plan = myself_next_week_plan;
+      if(weekly_summary) data.weekly_summary = weekly_summary;
+      if(evaluator_id) data.evaluator_id = evaluator_id;
       await data.save();
     }else {
       data = await this.ctx.model.Week.create({
-        score, evaluate, startweekdate, endweekdate, evaluator_id, evaluated_id, week_id: uuid().replace(/\-/g, '')
+        score, evaluate, startweekdate, endweekdate, evaluator_id, evaluated_id, week_id: uuid().replace(/\-/g, ''), leader_next_week_plan, myself_next_week_plan, weekly_summary
       });
     }
-    this.ctx.body = {status: 0, msg: '评语保存成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '保存成功'} as SuccessResult
   }
 
   @put('/notice')
@@ -1351,7 +1357,24 @@ export class HomeController {
       } as ErrorResult;
     }
     const user = await this.service.getUser({id: data.user_id});
-    this.ctx.body = user;
+    let jwt = new Jwt({
+      userId: data.user_id
+    });
+    let token = jwt.generateToken();
+    this.ctx.body = {status: 0, msg: '用户信息获取成功', result: user.result, token};
+  }
+
+  @get('/updateToken')
+  updateToken(){
+    let oldToken = this.ctx.headers.token;
+    let jwt1 = new Jwt(oldToken);
+    let result = jwt1.verifyToken();
+    let uuid = result.userId;
+    let jwt2 = new Jwt({
+      userId: uuid
+    });
+    let token = jwt2.generateToken();
+    this.ctx.body = {status: 0, msg: 'token更新成功', token};
   }
 
   @post('/sendCode')
@@ -1359,7 +1382,6 @@ export class HomeController {
     try {
       let {email: toEmail} = this.ctx.request.body;
       let code = getCode(6);
-      console.log(code);
       let data = await sendEmail(toEmail, 'WEBLINKON验证码', `【纬领工作平台平台】您的邮箱验证码是：${code}。验证码有效期：1分钟。工作人员不会向您索要，索要验证码的都是骗子，如非本人操作请忽略。`);
       this.ctx.session.yzm = code; //设置session captcha 为生成的验证码字符串
       this.ctx.body = {

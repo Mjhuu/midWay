@@ -20,7 +20,7 @@ export interface AddDepartmentOptions {
  */
 
 export interface ErrorResult {
-  status: 500;
+  status: 500 | 403;
   msg: string;
   result?: object
 }
