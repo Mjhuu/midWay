@@ -8,7 +8,7 @@ module.exports = options => {
             if (!ctx.headers.referer) {
                 return ctx.body = {status: 403, msg: '只能在纬领工作台使用此接口'} as ErrorResult;
             }
-            if (!ctx.headers.referer.includes('http://192.168.0.102:3000') && !ctx.headers.referer.includes('http://192.168.0.102:7001') && !ctx.headers.referer.includes('http://192.168.0.79:7003')) {
+            if (!ctx.headers.referer.includes('http://192.168.0.102:3000') && !ctx.headers.referer.includes('http://192.168.0.102:7003') && !ctx.headers.referer.includes('http://192.168.0.79:7003')) {
                 return ctx.body = {status: 403, msg: '非法请求'} as ErrorResult;
             }
             const {token, userid} = ctx.headers;
@@ -28,6 +28,9 @@ module.exports = options => {
                 const user = await ctx.model.Employee.findOne({where: {user_id: userId}});
                 if (!user) {
                     return ctx.body = {status: 403, msg: '暂无此用户'} as ErrorResult;
+                }
+                if(user.leaveOffice === 1){
+                    return ctx.body = {status: 403, msg: '你已离职，无权使用系统'} as ErrorResult;
                 }
                 await next();
             }

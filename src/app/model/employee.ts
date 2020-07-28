@@ -15,7 +15,8 @@ export default (app: Application) => {
         job_id: STRING(50),
         head_url: TEXT,
         description: TEXT,
-        gender: {type: INTEGER, allowNull: false, defaultValue: 1}
+        gender: {type: INTEGER, allowNull: false, defaultValue: 1},
+        leaveOffice: {type: INTEGER, defaultValue: 0}, // 是否离职
     }, {
         freezeTableName: true
     });

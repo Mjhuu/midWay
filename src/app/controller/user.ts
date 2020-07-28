@@ -94,7 +94,7 @@ export class UserController {
   }
   @put('/')
   async updateUser() {
-    const {userId, username, mobile, telphone, head_url, gender, email = '', job_id = '', role = '', joinTime = ''} = this.ctx.request.body;
+    const {userId, username, mobile, telphone, head_url, gender, email = '', job_id = '', role = '', joinTime = '', leaveOffice} = this.ctx.request.body;
     const data = await this.ctx.model.Employee.findOne({
       where: {user_id: userId}
     });
@@ -123,7 +123,8 @@ export class UserController {
     if (mobile) { data.mobile = mobile; }
     if (telphone) { data.telphone = telphone; }
     if (head_url) { data.head_url = head_url; }
-    if (gender) { data.gender = gender; }
+    if (gender !== undefined) { data.gender = gender; }
+    if (leaveOffice !== undefined) { data.leaveOffice = leaveOffice; }
     if (email) {
       const hasEmail = await this.ctx.model.Employee.findOne({where: {email, user_id: {[Op.ne]: userId}}});
       if (!!hasEmail) {

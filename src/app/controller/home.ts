@@ -79,8 +79,7 @@ export class HomeController {
       size: 4, // 验证码长度
       ignoreChars: 'oO1il', // 排除oO1il
       noise: 5, // 干扰线条
-      color: true,
-      height: 44
+      height: 44,
     });
     this.ctx.session.captcha = captcha.text.toLocaleLowerCase(); // 设置session captcha 为生成的验证码字符串
     this.ctx.response['type'] = 'svg';
@@ -1355,6 +1354,9 @@ export class HomeController {
         msg: '用户名或密码错误',
         status: 500,
       } as ErrorResult;
+    }
+    if(data.leaveOffice === 1){
+      return this.ctx.body = {status: 500, msg: '你已离职，无权使用系统'} as ErrorResult;
     }
     const user = await this.service.getUser({id: data.user_id});
     const jwt = new Jwt({
