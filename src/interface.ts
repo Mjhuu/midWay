@@ -22,12 +22,12 @@ export interface AddDepartmentOptions {
 export interface ErrorResult {
   status: 500 | 403;
   msg: string;
-  result?: object
+  result?: object;
 }
 export interface SuccessResult {
-  status: 200 | 0,
+  status: 200 | 0;
   msg: string;
-  result?: object
+  result?: object;
 }
 
 /**
@@ -35,5 +35,5 @@ export interface SuccessResult {
  */
 export interface IUserService {
   getUser(options: IUserOptions): Promise<SuccessResult | ErrorResult>;
-  login(options: LoginOptions): Promise<SuccessResult | ErrorResult>
+  login(options: LoginOptions): Promise<SuccessResult | ErrorResult>;
 }

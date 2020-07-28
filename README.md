@@ -1,6 +1,6 @@
 # serve
 
-{{description}}
+midWay服务器框架
 
 ## QuickStart
 
@@ -19,6 +19,8 @@ $ open http://localhost:7001/
 ### Deploy
 
 ```bash
+$ npm run ci
+$ npm build
 $ npm start
 $ npm stop
 ```

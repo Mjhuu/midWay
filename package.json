@@ -1,7 +1,7 @@
 {
   "name": "serve",
   "version": "1.0.0",
-  "description": "{{description}}",
+  "description": "工作台Api后台",
   "private": true,
   "dependencies": {
     "await-stream-ready": "^1.0.1",
@@ -60,6 +60,13 @@
     "type": "git",
     "url": ""
   },
-  "author": "anonymous",
+  "midway-bin-build": {
+    "include": [
+      "app/public",
+      "app/view",
+      "app/pem"
+    ]
+  },
+  "author": "Mjhu",
   "license": "MIT"
 }

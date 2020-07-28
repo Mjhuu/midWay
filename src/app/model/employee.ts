@@ -1,4 +1,4 @@
-import {Application} from "midway";
+import {Application} from 'midway';
 
 export default (app: Application) => {
     const { STRING, INTEGER, DATE, TEXT } = app.Sequelize;

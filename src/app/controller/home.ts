@@ -1,8 +1,8 @@
-import {Context, inject, controller, get, post, del, put, provide,} from 'midway';
-import {AddDepartmentOptions, ErrorResult, IUserService, SuccessResult} from "../../interface";
+import {Context, inject, controller, get, post, del, put, provide, } from 'midway';
+import {AddDepartmentOptions, ErrorResult, IUserService, SuccessResult} from '../../interface';
 import { uuid } from 'uuidv4';
-import {Jwt} from './../jwt'
-let svgCaptcha = require('svg-captcha');
+import {Jwt} from './../jwt/jwt';
+const svgCaptcha = require('svg-captcha');
 const path = require('path');
 const fs = require('fs');
 // 故名思意 异步二进制 写入流
@@ -13,10 +13,9 @@ const dayjs = require('dayjs');
 const md5 = require('md5-nodejs');
 const nodeMailer = require('nodemailer');
 
-
 function getCode(length) {
-  let codeArr = [1, 3, 4, 2, 6, 7, 5, 9, 8, 0];
-  let codeLength = length;
+  const codeArr = [1, 3, 4, 2, 6, 7, 5, 9, 8, 0];
+  const codeLength = length;
   let code = '';
   for (let i = 0; i < codeLength; i++) {
     code += codeArr[parseInt(String(Math.random() * codeArr.length))];
@@ -24,31 +23,32 @@ function getCode(length) {
   return code;
 }
 
-let transporter= nodeMailer.createTransport({
-  host: 'smtp.qq.com',//邮箱服务的主机，如smtp.qq.com
-  port: 465,//对应的端口号
-  //开启安全连接
+const transporter = nodeMailer.createTransport({
+  host: 'smtp.qq.com', // 邮箱服务的主机，如smtp.qq.com
+  port: 465, // 对应的端口号
+  // 开启安全连接
   // secure: false,
   secureConnection: true,
-  //用户信息
-  auth:{
+  // 用户信息
+  auth: {
     user: '1441901570@qq.com',
     pass: 'nyhcoegvmyhmhgei'
   }
 });
 
-export const sendEmail = (toEmail, title = '', text = '', html = '') =>{
+export const sendEmail = (toEmail, title = '', text = '', html = '') => {
   return new Promise((resolve, reject) => {
-    let mailOptions={
+    const mailOptions = {
       from: '纬领工作平台 <1441901570@qq.com>',
       to: toEmail,
       subject: title,
       text,
       html
     };
-    transporter.sendMail(mailOptions,(error,info)=>{
-      if(error)
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
         return reject(error);
+      }
       resolve({
         Message: info.messageId,
         sent: info.response
@@ -69,133 +69,133 @@ export class HomeController {
 
   @get('/')
   async index() {
-    await this.ctx.render('index')
+    await this.ctx.render('index');
   }
 
   // 获取验证码
   @get('/captcha')
   async captcha() {
-    let captcha = svgCaptcha.create({
-      size: 4, //验证码长度
-      ignoreChars: 'oO1il', //排除oO1il
-      noise: 5, //干扰线条
+    const captcha = svgCaptcha.create({
+      size: 4, // 验证码长度
+      ignoreChars: 'oO1il', // 排除oO1il
+      noise: 5, // 干扰线条
       color: true,
       height: 44
     });
-    this.ctx.session.captcha = captcha.text.toLocaleLowerCase(); //设置session captcha 为生成的验证码字符串
+    this.ctx.session.captcha = captcha.text.toLocaleLowerCase(); // 设置session captcha 为生成的验证码字符串
     this.ctx.response['type'] = 'svg';
     this.ctx.body = captcha.data;
   }
   /*********************部门Api************************/
   @post('/department')
-  async addDepartment(){
-    let {department_description, department_name, creator_id} : AddDepartmentOptions = this.ctx.request.body;
+  async addDepartment() {
+    const {department_description, department_name, creator_id}: AddDepartmentOptions = this.ctx.request.body;
     let data = await this.ctx.model.Department.findOne({
       where: {
         department_name
       }
     });
-    if(data){
-      return this.ctx.body = {status: 500, msg: '已存在同名部门'} as ErrorResult
+    if (data) {
+      return this.ctx.body = {status: 500, msg: '已存在同名部门'} as ErrorResult;
     }
     data = await this.ctx.model.Department.create({
       department_description, department_name, creator_id, department_id: uuid().replace(/\-/g, '')
     });
-    this.ctx.body = {status: 0, msg: '部门添加成功', result: data} as SuccessResult
+    this.ctx.body = {status: 0, msg: '部门添加成功', result: data} as SuccessResult;
   }
 
   @get('/departments')
-  async getAllDepartments(){
-    let departments = await this.ctx.model.Department.findAll();
-    let departmentList = [];
-    for(let i in departments){
-      let creator = await this.ctx.model.Employee.findByPk(departments[i].creator_id, {
+  async getAllDepartments() {
+    const departments = await this.ctx.model.Department.findAll();
+    const departmentList = [];
+    for (const i in departments) {
+      const creator = await this.ctx.model.Employee.findByPk(departments[i].creator_id, {
         attributes: ['user_id', 'username']
       });
       departmentList.push({
         departmentInfo: departments[i],
         creator
-      })
+      });
     }
-    this.ctx.body = {status: 0, msg: '部门列表获取成功', result: {departmentList}} as SuccessResult
+    this.ctx.body = {status: 0, msg: '部门列表获取成功', result: {departmentList}} as SuccessResult;
   }
 
   @del('/department')
-  async delDepartment(){
-    let {department_id} = this.ctx.request.body;
-    let department = await this.ctx.model.Department.findOne({
+  async delDepartment() {
+    const {department_id} = this.ctx.request.body;
+    const department = await this.ctx.model.Department.findOne({
       where: {department_id}
     });
-    if(!department){
-      return this.ctx.body = {status: 500, msg: '此部门不存在'} as ErrorResult
+    if (!department) {
+      return this.ctx.body = {status: 500, msg: '此部门不存在'} as ErrorResult;
     }
     await department.destroy();
-    this.ctx.body = {status: 0, msg: '部门删除成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '部门删除成功'} as SuccessResult;
   }
 
   @del('/user')
-  async delUser(){
-    let {userId} = this.ctx.request.body;
-    let user = await this.ctx.model.Employee.findOne({
+  async delUser() {
+    const {userId} = this.ctx.request.body;
+    const user = await this.ctx.model.Employee.findOne({
       where: {user_id: userId}
     });
-    if(!user){
-      return this.ctx.body = {status: 500, msg: '此员工不存在'} as ErrorResult
+    if (!user) {
+      return this.ctx.body = {status: 500, msg: '此员工不存在'} as ErrorResult;
     }
     await user.destroy();
-    this.ctx.body = {status: 0, msg: '员工删除成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '员工删除成功'} as SuccessResult;
   }
 
   @put('/department')
-  async updateDepartment(){
-    let {department_id, department_name, department_description} = this.ctx.request.body;
-    let department = await this.ctx.model.Department.findOne({
+  async updateDepartment() {
+    const {department_id, department_name, department_description} = this.ctx.request.body;
+    const department = await this.ctx.model.Department.findOne({
       where: {department_id}
     });
-    if(!department){
-      return this.ctx.body = {status: 500, msg: '此部门不存在'} as ErrorResult
+    if (!department) {
+      return this.ctx.body = {status: 500, msg: '此部门不存在'} as ErrorResult;
     }
     department.department_name = department_name;
     department.department_description = department_description;
     await department.save();
-    this.ctx.body = {status: 0, msg: '部门信息修改成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '部门信息修改成功'} as SuccessResult;
   }
 
   @get('/jobs/:departmentId')
-  async getDepartmentJobs(){
+  async getDepartmentJobs() {
     const departmentId: number = this.ctx.params.departmentId;
-    let jobs = await this.ctx.model.Job.findAll({
+    const jobs = await this.ctx.model.Job.findAll({
       where: {department_id: departmentId}
     });
     this.ctx.body = {status: 0, msg: '职位获取成功', result: {
       jobList: jobs
-      }} as SuccessResult
+      }} as SuccessResult;
   }
 
   @get('/users/:departmentId')
-  async getDepartmentUsers(){
+  async getDepartmentUsers() {
     const { Op } = this.ctx.app['Sequelize'];
     let departmentId: string = this.ctx.params.departmentId;
     const keyword: string = this.ctx.query.keyword || '';
-    if(departmentId === '-1'){
-      departmentId = ''
+    if (departmentId === '-1') {
+      departmentId = '';
     }
-    let userList: Array<any> = [];
+    const userList: any[] = [];
     // 获取部门信息
-    let departments = await this.ctx.model.Department.findAll({
+    const departments = await this.ctx.model.Department.findAll({
       where: {department_id: {[Op.like]: `%${departmentId}%`}},
       attributes: ['department_id', 'department_name']
     });
-    for(let index in departments){
+    for (const index in departments) {
       // 获取所有职位
-      let jobs = await this.ctx.model.Job.findAll({
+      const jobs = await this.ctx.model.Job.findAll({
         where: {department_id: departments[index].department_id}
       });
-      let jobIdArr = [];
-      for(let i in jobs){
-        jobIdArr.push(jobs[i].job_id)
+      const jobIdArr = [];
+      for (const i in jobs) {
+        jobIdArr.push(jobs[i].job_id);
       }
-      let userArr = await this.ctx.model.Employee.findAll({
+      const userArr = await this.ctx.model.Employee.findAll({
         where: {
           job_id: {[Op.in]: jobIdArr},
           username: {[Op.like]: `%${keyword}%`}
@@ -205,34 +205,34 @@ export class HomeController {
           ['createdAt', 'DESC']
         ],
       });
-      let users = [];
-      for(let userIndex in userArr){
-        let jobInfo = await this.ctx.model.Job.findByPk(userArr[userIndex].job_id, {
+      const users = [];
+      for (const userIndex in userArr) {
+        const jobInfo = await this.ctx.model.Job.findByPk(userArr[userIndex].job_id, {
           attributes: ['job_id', 'job_name', 'department_id']
         });
         users.push({
           userInfo: userArr[userIndex],
           jobInfo
-        })
+        });
       }
       userList.push({
         departmentInfo: departments[index],
         users
-      })
+      });
     }
     this.ctx.body = {status: 0, msg: '职位获取成功', result: {
         userList
-      }} as SuccessResult
+      }} as SuccessResult;
   }
 
   @get('/jobs')
-  async getJobs(){
-    let departments = await this.ctx.model.Department.findAll({
+  async getJobs() {
+    const departments = await this.ctx.model.Department.findAll({
       attributes: ['department_id', 'department_name']
     });
-    let departmentList = [];
-    for(let i in departments){
-      let jobList = await this.ctx.model.Job.findAll({
+    const departmentList = [];
+    for (const i in departments) {
+      const jobList = await this.ctx.model.Job.findAll({
         where: {
           department_id: departments[i].department_id
         },
@@ -241,60 +241,60 @@ export class HomeController {
       departmentList.push({
         departmentInfo: departments[i],
         jobList
-      })
+      });
     }
-    this.ctx.body = {status: 0, msg: '获取成功', result: {departmentList}} as SuccessResult
+    this.ctx.body = {status: 0, msg: '获取成功', result: {departmentList}} as SuccessResult;
   }
 
   @post('/job')
-  async addJob(){
-    let {job_name, department_id} = this.ctx.request.body;
+  async addJob() {
+    const {job_name, department_id} = this.ctx.request.body;
     let data = await this.ctx.model.Job.findOne({
       where: {
         job_name,
         department_id
       }
     });
-    if(data){
-      return this.ctx.body = {status: 500, msg: '此部门已存在此职位'} as ErrorResult
+    if (data) {
+      return this.ctx.body = {status: 500, msg: '此部门已存在此职位'} as ErrorResult;
     }
     data = await this.ctx.model.Job.create({
       job_name, department_id, job_id: uuid().replace(/\-/g, '')
     });
-    this.ctx.body = {status: 0, msg: '职位添加成功', result: data} as SuccessResult
+    this.ctx.body = {status: 0, msg: '职位添加成功', result: data} as SuccessResult;
   }
 
   @del('/job')
-  async delJob(){
-    let {job_id} = this.ctx.request.body;
-    let job = await this.ctx.model.Job.findOne({
+  async delJob() {
+    const {job_id} = this.ctx.request.body;
+    const job = await this.ctx.model.Job.findOne({
       where: {job_id}
     });
-    if(!job){
-      return this.ctx.body = {status: 500, msg: '此职位不存在'} as ErrorResult
+    if (!job) {
+      return this.ctx.body = {status: 500, msg: '此职位不存在'} as ErrorResult;
     }
     await job.destroy();
-    this.ctx.body = {status: 0, msg: '职位删除成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '职位删除成功'} as SuccessResult;
   }
 
   @put('/job')
-  async updateJob(){
-    let {job_id, job_name} = this.ctx.request.body;
-    let job = await this.ctx.model.Job.findOne({
+  async updateJob() {
+    const {job_id, job_name} = this.ctx.request.body;
+    const job = await this.ctx.model.Job.findOne({
       where: {job_id}
     });
-    if(!job){
-      return this.ctx.body = {status: 500, msg: '此职位不存在'} as ErrorResult
+    if (!job) {
+      return this.ctx.body = {status: 500, msg: '此职位不存在'} as ErrorResult;
     }
     job.job_name = job_name;
     await job.save();
-    this.ctx.body = {status: 0, msg: '职位信息修改成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '职位信息修改成功'} as SuccessResult;
   }
 
   @get('/memos/:userId')
-  async getUserMemos(){
-    let userId: string = this.ctx.params.userId;
-    let memos = await this.ctx.model.Memo.findAll({
+  async getUserMemos() {
+    const userId: string = this.ctx.params.userId;
+    const memos = await this.ctx.model.Memo.findAll({
       where: {
         user_id: userId
       },
@@ -302,65 +302,65 @@ export class HomeController {
         ['createdAt', 'DESC']
       ],
     });
-    this.ctx.body = {status: 0, msg: '获取成功', result: {memoList: memos}} as SuccessResult
+    this.ctx.body = {status: 0, msg: '获取成功', result: {memoList: memos}} as SuccessResult;
   }
 
   @post('/memo')
-  async addMemo(){
-    let {userId} = this.ctx.request.body;
-    let data = await this.ctx.model.Memo.create({
+  async addMemo() {
+    const {userId} = this.ctx.request.body;
+    const data = await this.ctx.model.Memo.create({
       user_id: userId, memo_id: uuid().replace(/\-/g, '')
     });
-    this.ctx.body = {status: 0, msg: '新增备忘录成功', result: data} as SuccessResult
+    this.ctx.body = {status: 0, msg: '新增备忘录成功', result: data} as SuccessResult;
   }
 
   @put('/memo')
-  async updateMemo(){
-    let {memoId, content} = this.ctx.request.body;
-    let memo = await this.ctx.model.Memo.findOne({
+  async updateMemo() {
+    const {memoId, content} = this.ctx.request.body;
+    const memo = await this.ctx.model.Memo.findOne({
       where: {memo_id: memoId}
     });
-    if(!memo){
-      return this.ctx.body = {status: 500, msg: '此备忘录不存在'} as ErrorResult
+    if (!memo) {
+      return this.ctx.body = {status: 500, msg: '此备忘录不存在'} as ErrorResult;
     }
     memo.content = content;
     await memo.save();
-    this.ctx.body = {status: 0, msg: '备忘录保存成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '备忘录保存成功'} as SuccessResult;
   }
 
   @del('/memo')
-  async delMemo(){
-    let {memoId} = this.ctx.request.body;
-    let memo = await this.ctx.model.Memo.findOne({
+  async delMemo() {
+    const {memoId} = this.ctx.request.body;
+    const memo = await this.ctx.model.Memo.findOne({
       where: {memo_id: memoId}
     });
-    if(!memo){
-      return this.ctx.body = {status: 500, msg: '此备忘录不存在'} as ErrorResult
+    if (!memo) {
+      return this.ctx.body = {status: 500, msg: '此备忘录不存在'} as ErrorResult;
     }
     await memo.destroy();
-    this.ctx.body = {status: 0, msg: '备忘录删除成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '备忘录删除成功'} as SuccessResult;
   }
 
   @get('/project/:projectId')
-  async getProjectInfo(){
-    let projectId: string = this.ctx.params.projectId;
-    let project = await this.ctx.model.Project.findByPk(projectId);
-    if(!project){
-      return this.ctx.body = {status: 500, msg: '此项目不存在'} as ErrorResult
+  async getProjectInfo() {
+    const projectId: string = this.ctx.params.projectId;
+    const project = await this.ctx.model.Project.findByPk(projectId);
+    if (!project) {
+      return this.ctx.body = {status: 500, msg: '此项目不存在'} as ErrorResult;
     }
     // 每个项目的创建者
-    let creatorInfo = await this.ctx.model.Employee.findByPk(project.creator_id, {
+    const creatorInfo = await this.ctx.model.Employee.findByPk(project.creator_id, {
       attributes: ['username', 'user_id']
     });
     // 获取加入的人
-    let peoples = await this.ctx.model.Projectgroup.findAll({
+    const peoples = await this.ctx.model.Projectgroup.findAll({
       where: {
         project_id: project.project_id
       }
     });
-    let peopleList = [];
-    for(let pIndex in peoples){
-      let userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
+    const peopleList = [];
+    for (const pIndex in peoples) {
+      const userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
         attributes: ['username', 'user_id', 'head_url']
       });
       peopleList.push({
@@ -369,30 +369,30 @@ export class HomeController {
       });
     }
     // 获取协同记录
-    let twList = [];
-    let teamWorks = await this.ctx.model.Teamwork.findAll({
+    const twList = [];
+    const teamWorks = await this.ctx.model.Teamwork.findAll({
       where: {
         project_id: project.project_id,
         isrefuse: 2, // 已接受
       }
-    })
-    for(let tIndex in teamWorks){
+    });
+    for (const tIndex in teamWorks) {
       // 获取帮助的工作记录
-      let taskFirst = await this.ctx.model.Taskfirst.findOne({
+      const taskFirst = await this.ctx.model.Taskfirst.findOne({
         where: {
           tf_id: teamWorks[tIndex].tf_id
         }
       });
       // 获取此工作记录的用户信息
-      let tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirst.executor_id, {
+      const tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirst.executor_id, {
         attributes: ['username', 'user_id']
       });
       // 获取协同记录的用户信息
-      let twUserInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].executor_id, {
+      const twUserInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].executor_id, {
         attributes: ['username', 'user_id']
       });
       // 获取创建者信息
-      let creatorInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].creator_id, {
+      const creatorInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].creator_id, {
         attributes: ['username', 'user_id']
       });
       twList.push({
@@ -401,29 +401,29 @@ export class HomeController {
         twUserInfo,
         creatorInfo,
         teamWork: teamWorks[tIndex]
-      })
+      });
     }
     // 获取工作记录
-    let tfList = [];
-    let taskFirsts = await this.ctx.model.Taskfirst.findAll({
+    const tfList = [];
+    const taskFirsts = await this.ctx.model.Taskfirst.findAll({
       where: {
         project_id: project.project_id
       }
     });
-    for(let tfIndex in taskFirsts){
+    for (const tfIndex in taskFirsts) {
       // 获取此工作记录的用户信息
-      let tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].executor_id, {
+      const tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].executor_id, {
         attributes: ['username', 'user_id']
       });
       // 获取创建者信息
-      let creatorInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].creator_id, {
+      const creatorInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].creator_id, {
         attributes: ['username', 'user_id']
       });
       tfList.push({
         tfUserInfo,
         creatorInfo,
         taskFirst: taskFirsts[tfIndex]
-      })
+      });
     }
     this.ctx.body = {status: 0, msg: '获取项目成功', result: {
         creatorInfo,
@@ -431,32 +431,32 @@ export class HomeController {
         peopleList,
         twList,
         tfList,
-      }} as SuccessResult
+      }} as SuccessResult;
   }
 
   @get('/projects')
-  async getAllProject(){
-    let projects = await this.ctx.model.Project.findAll({
+  async getAllProject() {
+    const projects = await this.ctx.model.Project.findAll({
       order: [
         ['createdAt', 'DESC']
       ],
     });
-    let projectList = [];
-    for (let i in projects){
-      let project = projects[i];
+    const projectList = [];
+    for (const i in projects) {
+      const project = projects[i];
       // 每个项目的创建者
-      let creatorInfo = await this.ctx.model.Employee.findByPk(project.creator_id, {
+      const creatorInfo = await this.ctx.model.Employee.findByPk(project.creator_id, {
         attributes: ['username', 'user_id']
       });
       // 获取加入的人
-      let peoples = await this.ctx.model.Projectgroup.findAll({
+      const peoples = await this.ctx.model.Projectgroup.findAll({
         where: {
           project_id: project.project_id
         }
       });
-      let peopleList = [];
-      for(let pIndex in peoples){
-        let userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
+      const peopleList = [];
+      for (const pIndex in peoples) {
+        const userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
           attributes: ['username', 'user_id', 'head_url']
         });
         peopleList.push({
@@ -468,36 +468,36 @@ export class HomeController {
         creatorInfo,
         projectInfo: project,
         peopleList,
-      })
+      });
     }
-    this.ctx.body = {status: 0, msg: '获取成功', result: {projectList}} as SuccessResult
+    this.ctx.body = {status: 0, msg: '获取成功', result: {projectList}} as SuccessResult;
   }
 
   @post('/project')
-  async addProject(){
-    let {userId, bgcolor, project_name, project_description, starttime, endtime, status} = this.ctx.request.body;
-    let data = await this.ctx.model.Project.findOne({
+  async addProject() {
+    const {userId, bgcolor, project_name, project_description, starttime, endtime, status} = this.ctx.request.body;
+    const data = await this.ctx.model.Project.findOne({
       where: {
         project_name
       }
     });
-    if(data){
-      return this.ctx.body = {status: 500, msg: '此项目已存在'} as ErrorResult
+    if (data) {
+      return this.ctx.body = {status: 500, msg: '此项目已存在'} as ErrorResult;
     }
-    let project = await this.ctx.model.Project.create({
+    const project = await this.ctx.model.Project.create({
       creator_id: userId, bgcolor, project_name, project_description, starttime, endtime, status, project_id: uuid().replace(/\-/g, '')
     });
-    this.ctx.body = {status: 0, msg: '新增项目成功', result: project} as SuccessResult
+    this.ctx.body = {status: 0, msg: '新增项目成功', result: project} as SuccessResult;
   }
 
   @put('/project')
-  async updateProject(){
-    let {project_id, bgcolor, project_name, project_description, endtime, starttime, status} = this.ctx.request.body;
-    let project = await this.ctx.model.Project.findOne({
+  async updateProject() {
+    const {project_id, bgcolor, project_name, project_description, endtime, starttime, status} = this.ctx.request.body;
+    const project = await this.ctx.model.Project.findOne({
       where: {project_id}
     });
-    if(!project){
-      return this.ctx.body = {status: 500, msg: '此项目不存在'} as ErrorResult
+    if (!project) {
+      return this.ctx.body = {status: 500, msg: '此项目不存在'} as ErrorResult;
     }
     project.bgcolor = bgcolor;
     project.project_name = project_name;
@@ -506,95 +506,95 @@ export class HomeController {
     project.starttime = starttime;
     project.status = status;
     await project.save();
-    this.ctx.body = {status: 0, msg: '项目保存成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '项目保存成功'} as SuccessResult;
   }
 
   @del('/project')
-  async delProject(){
-    let {project_id} = this.ctx.request.body;
-    let project = await this.ctx.model.Project.findOne({
+  async delProject() {
+    const {project_id} = this.ctx.request.body;
+    const project = await this.ctx.model.Project.findOne({
       where: {project_id}
     });
-    if(!project){
-      return this.ctx.body = {status: 500, msg: '此项目不存在'} as ErrorResult
+    if (!project) {
+      return this.ctx.body = {status: 500, msg: '此项目不存在'} as ErrorResult;
     }
     await project.destroy();
-    this.ctx.body = {status: 0, msg: '项目删除成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '项目删除成功'} as SuccessResult;
   }
 
   @post('/project/join')
-  async joinProject(){
-    let {user_role, user_id, project_id} = this.ctx.request.body;
-    let data = await this.ctx.model.Projectgroup.findOne({
+  async joinProject() {
+    const {user_role, user_id, project_id} = this.ctx.request.body;
+    const data = await this.ctx.model.Projectgroup.findOne({
       where: {
         user_id,
         project_id
       }
     });
-    if(data){
-      return this.ctx.body = {status: 500, msg: '此成员已加入此项目'} as ErrorResult
+    if (data) {
+      return this.ctx.body = {status: 500, msg: '此成员已加入此项目'} as ErrorResult;
     }
-    let projectGroup = await this.ctx.model.Projectgroup.create({
+    const projectGroup = await this.ctx.model.Projectgroup.create({
       user_role, user_id, project_id
     });
-    this.ctx.body = {status: 0, msg: '加入项目成功', result: projectGroup} as SuccessResult
+    this.ctx.body = {status: 0, msg: '加入项目成功', result: projectGroup} as SuccessResult;
   }
 
   @del('/project/exit')
-  async exitProject(){
-    let {user_id, project_id} = this.ctx.request.body;
-    let data = await this.ctx.model.Projectgroup.findOne({
+  async exitProject() {
+    const {user_id, project_id} = this.ctx.request.body;
+    const data = await this.ctx.model.Projectgroup.findOne({
       where: {
         user_id,
         project_id
       }
     });
-    if(!data){
-      return this.ctx.body = {status: 500, msg: '此成员已退出此项目'} as ErrorResult
+    if (!data) {
+      return this.ctx.body = {status: 500, msg: '此成员已退出此项目'} as ErrorResult;
     }
     await data.destroy();
-    this.ctx.body = {status: 0, msg: '成功将此成员踢出项目'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '成功将此成员踢出项目'} as SuccessResult;
   }
 
   @get('/job_logging/:userId/:projectId')
-  async getUserProjectJob(){
-    let userId: string = this.ctx.params.userId;
-    let projectId: string = this.ctx.params.projectId;
-    let data = await this.ctx.model.Projectgroup.findOne({
+  async getUserProjectJob() {
+    const userId: string = this.ctx.params.userId;
+    const projectId: string = this.ctx.params.projectId;
+    const data = await this.ctx.model.Projectgroup.findOne({
       where: {
         user_id: userId,
         project_id: projectId
       }
     });
-    if(!data){
-      return this.ctx.body = {status: 500, msg: '此成员已退出此项目'} as ErrorResult
+    if (!data) {
+      return this.ctx.body = {status: 500, msg: '此成员已退出此项目'} as ErrorResult;
     }
     // 获取协同记录
-    let twList = [];
-    let teamWorks = await this.ctx.model.Teamwork.findAll({
+    const twList = [];
+    const teamWorks = await this.ctx.model.Teamwork.findAll({
       where: {
         project_id: projectId,
         executor_id: userId,
         isrefuse: 2, // 已接受
       }
-    })
-    for(let tIndex in teamWorks){
+    });
+    for (const tIndex in teamWorks) {
       // 获取帮助的工作记录
-      let taskFirst = await this.ctx.model.Taskfirst.findOne({
+      const taskFirst = await this.ctx.model.Taskfirst.findOne({
         where: {
           tf_id: teamWorks[tIndex].tf_id
         }
       });
       // 获取此工作记录的用户信息
-      let tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirst.executor_id, {
+      const tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirst.executor_id, {
         attributes: ['username', 'user_id']
       });
       // 获取协同记录的用户信息
-      let twUserInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].executor_id, {
+      const twUserInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].executor_id, {
         attributes: ['username', 'user_id']
       });
       // 获取创建者信息
-      let creatorInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].creator_id, {
+      const creatorInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].creator_id, {
         attributes: ['username', 'user_id']
       });
       twList.push({
@@ -603,50 +603,50 @@ export class HomeController {
         twUserInfo,
         creatorInfo,
         teamWork: teamWorks[tIndex]
-      })
+      });
     }
     // 获取工作记录
-    let tfList = [];
-    let taskFirsts = await this.ctx.model.Taskfirst.findAll({
+    const tfList = [];
+    const taskFirsts = await this.ctx.model.Taskfirst.findAll({
       where: {
         project_id: projectId,
         executor_id: userId
       }
     });
-    for(let tfIndex in taskFirsts){
+    for (const tfIndex in taskFirsts) {
       // 获取此工作记录的用户信息
-      let tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].executor_id, {
+      const tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].executor_id, {
         attributes: ['username', 'user_id']
       });
       // 获取创建者信息
-      let creatorInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].creator_id, {
+      const creatorInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].creator_id, {
         attributes: ['username', 'user_id']
       });
       tfList.push({
         tfUserInfo,
         creatorInfo,
         taskFirst: taskFirsts[tfIndex]
-      })
+      });
     }
     this.ctx.body = {status: 0, msg: '获取项目成功', result: {
         twList,
         tfList,
-      }} as SuccessResult
+      }} as SuccessResult;
   }
 
   @get('/projects/:userId')
-  async getJoinProjects(){
-    let userId: string = this.ctx.params.userId;
+  async getJoinProjects() {
+    const userId: string = this.ctx.params.userId;
     const { Op } = this.ctx.app['Sequelize'];
     // 获取加入的所有项目
-    let joinProjects = await this.ctx.model.Projectgroup.findAll({
+    const joinProjects = await this.ctx.model.Projectgroup.findAll({
       where: {user_id: userId}
     });
-    let projectIdArr = [];
-    for(let j in joinProjects){
-      projectIdArr.push(joinProjects[j].project_id)
+    const projectIdArr = [];
+    for (const j in joinProjects) {
+      projectIdArr.push(joinProjects[j].project_id);
     }
-    let projects = await this.ctx.model.Project.findAll({
+    const projects = await this.ctx.model.Project.findAll({
       where: {
         project_id: {[Op.in]: projectIdArr},
       },
@@ -654,22 +654,22 @@ export class HomeController {
         ['createdAt', 'DESC']
       ],
     });
-    let projectList = [];
-    for (let i in projects){
-      let project = projects[i];
+    const projectList = [];
+    for (const i in projects) {
+      const project = projects[i];
       // 每个项目的创建者
-      let creatorInfo = await this.ctx.model.Employee.findByPk(project.creator_id, {
+      const creatorInfo = await this.ctx.model.Employee.findByPk(project.creator_id, {
         attributes: ['username', 'user_id']
       });
       // 获取加入的人
-      let peoples = await this.ctx.model.Projectgroup.findAll({
+      const peoples = await this.ctx.model.Projectgroup.findAll({
         where: {
           project_id: project.project_id
         }
       });
-      let peopleList = [];
-      for(let pIndex in peoples){
-        let userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
+      const peopleList = [];
+      for (const pIndex in peoples) {
+        const userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
           attributes: ['username', 'user_id', 'head_url']
         });
         peopleList.push({
@@ -681,55 +681,55 @@ export class HomeController {
         creatorInfo,
         projectInfo: project,
         peopleList,
-      })
+      });
     }
-    this.ctx.body = {status: 0, msg: '获取成功', result: {projectList}} as SuccessResult
+    this.ctx.body = {status: 0, msg: '获取成功', result: {projectList}} as SuccessResult;
   }
 
   @post('/job_logging')
-  async addJobLogging(){
+  async addJobLogging() {
     try {
       // type === 0 ? '自己' : '领导'
-      let {status, tf_content, creator_id, creator_role, urgent, executor_id, project_id, description, teamWorkList, type = 0, createdAt} = this.ctx.request.body;
+      const {status, tf_content, creator_id, creator_role, urgent, executor_id, project_id, description, teamWorkList, type = 0, createdAt} = this.ctx.request.body;
       let jobLogging;
       // 如果没有选择项目
-      if(project_id === 'null'){
+      if (project_id === 'null') {
         jobLogging = await this.ctx.model.Taskfirst.create({
           tf_id: uuid().replace(/\-/g, ''), status, tf_content, creator_id, creator_role, urgent, executor_id, description, createdAt: new Date(createdAt)
-        })
-      }else {// 如果选择了项目
+        });
+      } else {// 如果选择了项目
         jobLogging = await this.ctx.model.Taskfirst.create({
           tf_id: uuid().replace(/\-/g, ''), status, tf_content, creator_id, creator_role, urgent, executor_id, description, project_id, createdAt: new Date(createdAt)
-        })
+        });
       }
       // 获取任务记录ID
-      let tf_id = jobLogging.tf_id;
+      const tf_id = jobLogging.tf_id;
       // 循环遍历协作写入库
-      for(let i in teamWorkList){
-        let {status, content, urgent, executor_id, creator_id, creator_role, project_id, createdAt} = teamWorkList[i];
-        if(project_id === 'null'){
+      for (const i in teamWorkList) {
+        const {status, content, urgent, executor_id, creator_id, creator_role, project_id, createdAt} = teamWorkList[i];
+        if (project_id === 'null') {
           await this.ctx.model.Teamwork.create({tw_id: uuid().replace(/\-/g, ''), tf_id, creator_id, content, status, creator_role, urgent, executor_id, isrefuse: type, createdAt: new Date(createdAt)
-          })
-        }else {
+          });
+        } else {
           await this.ctx.model.Teamwork.create({tw_id: uuid().replace(/\-/g, ''), tf_id, project_id, creator_id, content, status, creator_role, urgent, executor_id, isrefuse: type, createdAt: new Date(createdAt)
-          })
+          });
         }
       }
-      this.ctx.body = {status: 0, msg: '任务记录添加成功', result: {}} as SuccessResult
-    }catch (e) {
-      this.ctx.body = {status: 500, msg: '任务记录添加失败', result: e} as ErrorResult
+      this.ctx.body = {status: 0, msg: '任务记录添加成功', result: {}} as SuccessResult;
+    } catch (e) {
+      this.ctx.body = {status: 500, msg: '任务记录添加失败', result: e} as ErrorResult;
     }
   }
 
   @get('/job_logging/day')
-  async getDayJobLogging(){
-    let userId: string = this.ctx.query.userId;
-    let timeStart: string = this.ctx.query.timeStart;
-    let timeEnd: string = this.ctx.query.timeEnd;
+  async getDayJobLogging() {
+    const userId: string = this.ctx.query.userId;
+    const timeStart: string = this.ctx.query.timeStart;
+    const timeEnd: string = this.ctx.query.timeEnd;
     const { Op } = this.ctx.app['Sequelize'];
     // 获取我的协同记录
-    let twList = [];
-    let teamWorks = await this.ctx.model.Teamwork.findAll({
+    const twList = [];
+    const teamWorks = await this.ctx.model.Teamwork.findAll({
       where: {
         executor_id: userId,
         createdAt: {
@@ -739,28 +739,28 @@ export class HomeController {
           [Op.ne]: 1,
         }, // 不返回已拒绝的
       }
-    })
-    for(let tIndex in teamWorks){
+    });
+    for (const tIndex in teamWorks) {
       // 获取帮助的工作记录
-      let taskFirst = await this.ctx.model.Taskfirst.findOne({
+      const taskFirst = await this.ctx.model.Taskfirst.findOne({
         where: {
           tf_id: teamWorks[tIndex].tf_id
         }
       });
       // 获取此工作记录的用户信息
-      let tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirst.executor_id, {
+      const tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirst.executor_id, {
         attributes: ['username', 'user_id', 'head_url', 'role']
       });
       // 获取协同记录的用户信息
-      let twUserInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].executor_id, {
+      const twUserInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].executor_id, {
         attributes: ['username', 'user_id', 'head_url', 'role']
       });
       // 获取创建者信息
-      let creatorInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].creator_id, {
+      const creatorInfo = await this.ctx.model.Employee.findByPk(teamWorks[tIndex].creator_id, {
         attributes: ['username', 'user_id', 'head_url', 'role']
       });
       // 获取项目信息
-      let project = await this.ctx.model.Project.findByPk(teamWorks[tIndex].project_id);
+      const project = await this.ctx.model.Project.findByPk(teamWorks[tIndex].project_id);
       twList.push({
         taskFirst,
         tfUserInfo,
@@ -768,11 +768,11 @@ export class HomeController {
         creatorInfo,
         project,
         teamWork: teamWorks[tIndex]
-      })
+      });
     }
     // 获取工作记录
-    let tfList = [];
-    let taskFirsts = await this.ctx.model.Taskfirst.findAll({
+    const tfList = [];
+    const taskFirsts = await this.ctx.model.Taskfirst.findAll({
       where: {
         executor_id: userId,
         createdAt: {
@@ -780,33 +780,33 @@ export class HomeController {
         },
       }
     });
-    for(let tfIndex in taskFirsts){
+    for (const tfIndex in taskFirsts) {
       // 获取此工作记录的用户信息
-      let tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].executor_id, {
+      const tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].executor_id, {
         attributes: ['username', 'user_id', 'head_url', 'role']
       });
       // 获取创建者信息
-      let creatorInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].creator_id, {
+      const creatorInfo = await this.ctx.model.Employee.findByPk(taskFirsts[tfIndex].creator_id, {
         attributes: ['username', 'user_id', 'head_url', 'role']
       });
       // 获取项目信息
-      let project1 = await this.ctx.model.Project.findByPk(taskFirsts[tfIndex].project_id);
+      const project1 = await this.ctx.model.Project.findByPk(taskFirsts[tfIndex].project_id);
       // 获取此工作记录的协同列表信息
-      let twList1 = [];
-      let teamWorks1 = await this.ctx.model.Teamwork.findAll({
+      const twList1 = [];
+      const teamWorks1 = await this.ctx.model.Teamwork.findAll({
         where: {
           tf_id: taskFirsts[tfIndex].tf_id,
         }
       });
-      for(let tIndex in teamWorks1){
+      for (const tIndex in teamWorks1) {
         // 获取协同记录的用户信息
-        let twUserInfo = await this.ctx.model.Employee.findByPk(teamWorks1[tIndex].executor_id, {
+        const twUserInfo = await this.ctx.model.Employee.findByPk(teamWorks1[tIndex].executor_id, {
           attributes: ['username', 'user_id', 'head_url', 'role']
         });
         twList1.push({
           twUserInfo,
           teamWork: teamWorks1[tIndex]
-        })
+        });
       }
       tfList.push({
         tfUserInfo,
@@ -814,27 +814,27 @@ export class HomeController {
         project: project1,
         taskFirst: taskFirsts[tfIndex],
         twList: twList1
-      })
+      });
     }
     this.ctx.body = {status: 0, msg: '获取任务列表成功', result: {
         twList,
         tfList,
-      }} as SuccessResult
+      }} as SuccessResult;
   }
 
   @post('/job_logging/week')
-  async getWeekJobLoggings(){
-    let userId: string = this.ctx.request.body.userId;
-    let weekArr: Array<any> = this.ctx.request.body.weekArr;
-    let weekList = [];
+  async getWeekJobLoggings() {
+    const userId: string = this.ctx.request.body.userId;
+    const weekArr: any[] = this.ctx.request.body.weekArr;
+    const weekList = [];
     const { Op } = this.ctx.app['Sequelize'];
-    for(let i in weekArr){
+    for (const i in weekArr) {
       let {timeStart, timeEnd, week} = weekArr[i];
       timeStart = new Date(timeStart);
       timeEnd = new Date(timeEnd);
       // 获取总任务数
       let total = 0;
-      let tfTotal = await this.ctx.model.Taskfirst.count({
+      const tfTotal = await this.ctx.model.Taskfirst.count({
         where: {
           executor_id: userId,
           createdAt: {
@@ -842,7 +842,7 @@ export class HomeController {
           },
         }
       });
-      let twTotal = await this.ctx.model.Teamwork.count({
+      const twTotal = await this.ctx.model.Teamwork.count({
         where: {
           executor_id: userId,
           createdAt: {
@@ -856,7 +856,7 @@ export class HomeController {
       total = tfTotal + twTotal;
       // 获取正在进行总
       let finishingCount = 0;
-      let tfFinishingCount = await this.ctx.model.Taskfirst.count({
+      const tfFinishingCount = await this.ctx.model.Taskfirst.count({
         where: {
           executor_id: userId,
           createdAt: {
@@ -865,7 +865,7 @@ export class HomeController {
           status: 1
         }
       });
-      let twFinishingCount = await this.ctx.model.Teamwork.count({
+      const twFinishingCount = await this.ctx.model.Teamwork.count({
         where: {
           executor_id: userId,
           createdAt: {
@@ -880,7 +880,7 @@ export class HomeController {
       finishingCount = tfFinishingCount + twFinishingCount;
       // 获取已完成数
       let finishedCount = 0;
-      let tfFinishedCount = await this.ctx.model.Taskfirst.count({
+      const tfFinishedCount = await this.ctx.model.Taskfirst.count({
         where: {
           executor_id: userId,
           createdAt: {
@@ -889,7 +889,7 @@ export class HomeController {
           status: 2
         }
       });
-      let twFinishedCount = await this.ctx.model.Teamwork.count({
+      const twFinishedCount = await this.ctx.model.Teamwork.count({
         where: {
           executor_id: userId,
           createdAt: {
@@ -904,7 +904,7 @@ export class HomeController {
       finishedCount = tfFinishedCount + twFinishedCount;
       // 获取未完成数
       let unfinishedCount = 0;
-      let tfUnfinishedCount = await this.ctx.model.Taskfirst.count({
+      const tfUnfinishedCount = await this.ctx.model.Taskfirst.count({
         where: {
           executor_id: userId,
           createdAt: {
@@ -913,7 +913,7 @@ export class HomeController {
           status: 3
         }
       });
-      let twUnfinishedCount = await this.ctx.model.Teamwork.count({
+      const twUnfinishedCount = await this.ctx.model.Teamwork.count({
         where: {
           executor_id: userId,
           createdAt: {
@@ -928,22 +928,22 @@ export class HomeController {
       unfinishedCount = tfUnfinishedCount + twUnfinishedCount;
       weekList.push({
         timeStart, timeEnd, week, total, finishingCount, finishedCount, unfinishedCount
-      })
+      });
     }
     this.ctx.body = {status: 0, msg: '获取任务列表成功', result: {
         weekList
-      }} as SuccessResult
+      }} as SuccessResult;
   }
 
   @get('/job_loggings/month')
-  async getMonthUnfinishedJobLogging(){
-    let userId: string = this.ctx.query.userId;
-    let timeStart: string = this.ctx.query.timeStart;
-    let timeEnd: string = this.ctx.query.timeEnd;
+  async getMonthUnfinishedJobLogging() {
+    const userId: string = this.ctx.query.userId;
+    const timeStart: string = this.ctx.query.timeStart;
+    const timeEnd: string = this.ctx.query.timeEnd;
     const { Op } = this.ctx.app['Sequelize'];
     // 获取我的协同记录
-    let twList = [];
-    let teamWorks = await this.ctx.model.Teamwork.findAll({
+    const twList = [];
+    const teamWorks = await this.ctx.model.Teamwork.findAll({
       where: {
         executor_id: userId,
         createdAt: {
@@ -956,25 +956,25 @@ export class HomeController {
           [Op.ne]: 1,
         }, // 不返回已拒绝的
       }
-    })
-    for(let tIndex in teamWorks){
+    });
+    for (const tIndex in teamWorks) {
       // 获取帮助的工作记录
-      let taskFirst = await this.ctx.model.Taskfirst.findOne({
+      const taskFirst = await this.ctx.model.Taskfirst.findOne({
         where: {
           tf_id: teamWorks[tIndex].tf_id
         }
       });
       // 获取此工作记录的用户信息
-      let tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirst.executor_id, {
+      const tfUserInfo = await this.ctx.model.Employee.findByPk(taskFirst.executor_id, {
         attributes: ['username', 'user_id', 'head_url', 'role']
       });
       twList.push({
         tfUserInfo,
         teamWork: teamWorks[tIndex]
-      })
+      });
     }
     // 获取工作记录
-    let taskFirsts = await this.ctx.model.Taskfirst.findAll({
+    const taskFirsts = await this.ctx.model.Taskfirst.findAll({
       where: {
         executor_id: userId,
         createdAt: {
@@ -988,15 +988,15 @@ export class HomeController {
     this.ctx.body = {status: 0, msg: '获取任务列表成功', result: {
         twList,
         tfList: taskFirsts,
-      }} as SuccessResult
+      }} as SuccessResult;
   }
 
-  async getDateProgress(timeStart, timeEnd, userId){
+  async getDateProgress(timeStart, timeEnd, userId) {
     timeStart = new Date(timeStart);
     timeEnd = new Date(timeEnd);
     const { Op } = this.ctx.app['Sequelize'];
     let total = 0;
-    let tfTotal = await this.ctx.model.Taskfirst.count({
+    const tfTotal = await this.ctx.model.Taskfirst.count({
       where: {
         executor_id: userId,
         createdAt: {
@@ -1004,7 +1004,7 @@ export class HomeController {
         },
       }
     });
-    let twTotal = await this.ctx.model.Teamwork.count({
+    const twTotal = await this.ctx.model.Teamwork.count({
       where: {
         executor_id: userId,
         isrefuse: {
@@ -1018,7 +1018,7 @@ export class HomeController {
     total = tfTotal + twTotal;
     // 获取已完成数
     let finishedCount = 0;
-    let tfFinishedCount = await this.ctx.model.Taskfirst.count({
+    const tfFinishedCount = await this.ctx.model.Taskfirst.count({
       where: {
         executor_id: userId,
         status: 2,
@@ -1027,7 +1027,7 @@ export class HomeController {
         },
       }
     });
-    let twFinishedCount = await this.ctx.model.Teamwork.count({
+    const twFinishedCount = await this.ctx.model.Teamwork.count({
       where: {
         executor_id: userId,
         isrefuse: {
@@ -1044,27 +1044,27 @@ export class HomeController {
   }
 
   @post('/job_progress')
-  async getJobProgress(){
-    let userId: string = this.ctx.request.body.userId;
-    let dayArr: Array<any> = this.ctx.request.body.dayArr;
-    let weekArr: Array<any> = this.ctx.request.body.weekArr;
-    let monthArr: Array<any> = this.ctx.request.body.monthArr;
-    let progressList = [];
+  async getJobProgress() {
+    const userId: string = this.ctx.request.body.userId;
+    const dayArr: any[] = this.ctx.request.body.dayArr;
+    const weekArr: any[] = this.ctx.request.body.weekArr;
+    const monthArr: any[] = this.ctx.request.body.monthArr;
+    const progressList = [];
     const { Op } = this.ctx.app['Sequelize'];
     // 日
-    let dayProgress = await this.getDateProgress(dayArr[0], dayArr[1], userId);
+    const dayProgress = await this.getDateProgress(dayArr[0], dayArr[1], userId);
     progressList.push({
       title: '日工作完成度',
       progress: dayProgress
     });
     // 周
-    let weekProgress = await this.getDateProgress(weekArr[0], weekArr[1], userId);
+    const weekProgress = await this.getDateProgress(weekArr[0], weekArr[1], userId);
     progressList.push({
       title: '周工作完成度',
       progress: weekProgress
     });
     // 月
-    let monthProgress = await this.getDateProgress(monthArr[0], monthArr[1], userId);
+    const monthProgress = await this.getDateProgress(monthArr[0], monthArr[1], userId);
     progressList.push({
       title: '月工作完成度',
       progress: monthProgress
@@ -1072,12 +1072,12 @@ export class HomeController {
     // 总进度
     let totalProgress: any = 0;
     let total = 0;
-    let tfTotal = await this.ctx.model.Taskfirst.count({
+    const tfTotal = await this.ctx.model.Taskfirst.count({
       where: {
         executor_id: userId,
       }
     });
-    let twTotal = await this.ctx.model.Teamwork.count({
+    const twTotal = await this.ctx.model.Teamwork.count({
       where: {
         executor_id: userId,
         isrefuse: {
@@ -1088,13 +1088,13 @@ export class HomeController {
     total = tfTotal + twTotal;
     // 获取已完成数
     let finishedCount = 0;
-    let tfFinishedCount = await this.ctx.model.Taskfirst.count({
+    const tfFinishedCount = await this.ctx.model.Taskfirst.count({
       where: {
         executor_id: userId,
         status: 2
       }
     });
-    let twFinishedCount = await this.ctx.model.Teamwork.count({
+    const twFinishedCount = await this.ctx.model.Teamwork.count({
       where: {
         executor_id: userId,
         isrefuse: {
@@ -1111,98 +1111,98 @@ export class HomeController {
     });
     this.ctx.body = {status: 0, msg: '获取任务进度成功', result: {
         progressList
-      }} as SuccessResult
+      }} as SuccessResult;
   }
 
   @put('/job_together')
-  async updateTeamWork(){
-    let {tw_id, twInfo} = this.ctx.request.body;
-    let teamWork = await this.ctx.model.Teamwork.findOne({
+  async updateTeamWork() {
+    const {tw_id, twInfo} = this.ctx.request.body;
+    const teamWork = await this.ctx.model.Teamwork.findOne({
       where: {tw_id}
     });
-    if(!teamWork){
-      return this.ctx.body = {status: 500, msg: '协同记录不存在'} as ErrorResult
+    if (!teamWork) {
+      return this.ctx.body = {status: 500, msg: '协同记录不存在'} as ErrorResult;
     }
-    for (let i in twInfo){
-      teamWork[i] = twInfo[i]
+    for (const i in twInfo) {
+      teamWork[i] = twInfo[i];
     }
     await teamWork.save();
-    this.ctx.body = {status: 0, msg: '协同信息修改成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '协同信息修改成功'} as SuccessResult;
   }
 
   @del('/job_together')
-  async delTeamWork(){
-    let {tw_id} = this.ctx.request.body;
-    let teamWork = await this.ctx.model.Teamwork.findOne({
+  async delTeamWork() {
+    const {tw_id} = this.ctx.request.body;
+    const teamWork = await this.ctx.model.Teamwork.findOne({
       where: {tw_id}
     });
-    if(!teamWork){
-      return this.ctx.body = {status: 500, msg: '协同记录不存在'} as ErrorResult
+    if (!teamWork) {
+      return this.ctx.body = {status: 500, msg: '协同记录不存在'} as ErrorResult;
     }
     await teamWork.destroy();
-    this.ctx.body = {status: 0, msg: '协同记录删除成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '协同记录删除成功'} as SuccessResult;
   }
 
   @post('/job_together')
-  async addTeamWork(){
-    let {status, content, urgent, executor_id, creator_id, creator_role, project_id, tf_id, type = 0, createdAt} = this.ctx.request.body;
-    if(project_id === 'null'){
+  async addTeamWork() {
+    const {status, content, urgent, executor_id, creator_id, creator_role, project_id, tf_id, type = 0, createdAt} = this.ctx.request.body;
+    if (project_id === 'null') {
       await this.ctx.model.Teamwork.create({tw_id: uuid().replace(/\-/g, ''), tf_id, creator_id, content, status, creator_role, urgent, executor_id, isrefuse: type, createdAt: new Date(createdAt)
-      })
-    }else {
+      });
+    } else {
       await this.ctx.model.Teamwork.create({tw_id: uuid().replace(/\-/g, ''), tf_id, project_id, creator_id, content, status, creator_role, urgent, executor_id, isrefuse: type, createdAt: new Date(createdAt)
-      })
+      });
     }
-    this.ctx.body = {status: 0, msg: '协同记录添加成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '协同记录添加成功'} as SuccessResult;
   }
 
   @put('/job_logging')
-  async updateJobLogging(){
-    let {tf_id, tfInfo} = this.ctx.request.body;
-    let taskfirst = await this.ctx.model.Taskfirst.findOne({
+  async updateJobLogging() {
+    const {tf_id, tfInfo} = this.ctx.request.body;
+    const taskfirst = await this.ctx.model.Taskfirst.findOne({
       where: {tf_id}
     });
-    if(!taskfirst){
-      return this.ctx.body = {status: 500, msg: '任务记录不存在'} as ErrorResult
+    if (!taskfirst) {
+      return this.ctx.body = {status: 500, msg: '任务记录不存在'} as ErrorResult;
     }
-    for (let i in tfInfo){
-      taskfirst[i] = tfInfo[i]
+    for (const i in tfInfo) {
+      taskfirst[i] = tfInfo[i];
     }
     await taskfirst.save();
-    this.ctx.body = {status: 0, msg: '任务信息修改成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '任务信息修改成功'} as SuccessResult;
   }
 
   @del('/job_logging')
-  async delJobLogging(){
-    let {tf_id} = this.ctx.request.body;
-    let taskfirst = await this.ctx.model.Taskfirst.findOne({
+  async delJobLogging() {
+    const {tf_id} = this.ctx.request.body;
+    const taskfirst = await this.ctx.model.Taskfirst.findOne({
       where: {tf_id}
     });
-    if(!taskfirst){
-      return this.ctx.body = {status: 500, msg: '任务记录不存在'} as ErrorResult
+    if (!taskfirst) {
+      return this.ctx.body = {status: 500, msg: '任务记录不存在'} as ErrorResult;
     }
     await taskfirst.destroy();
-    this.ctx.body = {status: 0, msg: '任务记录删除成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '任务记录删除成功'} as SuccessResult;
   }
 
   @get('/week')
-  async getWeekEvaluate(){
-    let {evaluated_id, startweekdate, endweekdate,} = this.ctx.query;
+  async getWeekEvaluate() {
+    let {evaluated_id, startweekdate, endweekdate, } = this.ctx.query;
     startweekdate = new Date(startweekdate);
     endweekdate = new Date(endweekdate);
-    let data = await this.ctx.model.Week.findOne({
+    const data = await this.ctx.model.Week.findOne({
       where: {
         startweekdate, endweekdate, evaluated_id
       }
     });
-    if(!data){
-      return this.ctx.body = {status: 500, msg: '评语不存在'} as ErrorResult
+    if (!data) {
+      return this.ctx.body = {status: 500, msg: '评语不存在'} as ErrorResult;
     }
-    this.ctx.body = {status: 0, msg: '评语获取成功', result: data,} as SuccessResult
+    this.ctx.body = {status: 0, msg: '评语获取成功', result: data, } as SuccessResult;
   }
 
   @post('/week')
-  async addWeekEvaluate(){
+  async addWeekEvaluate() {
     let {score = 5, evaluate = '', startweekdate, endweekdate, evaluator_id, evaluated_id, leader_next_week_plan = '', myself_next_week_plan = '', weekly_summary = ''} = this.ctx.request.body;
     startweekdate = new Date(startweekdate);
     endweekdate = new Date(endweekdate);
@@ -1211,41 +1211,41 @@ export class HomeController {
         startweekdate, endweekdate, evaluated_id
       }
     });
-    if(data){
-      if(score) data.score = score;
-      if(evaluate) data.evaluate = evaluate;
-      if(leader_next_week_plan) data.leader_next_week_plan = leader_next_week_plan;
-      if(myself_next_week_plan) data.myself_next_week_plan = myself_next_week_plan;
-      if(weekly_summary) data.weekly_summary = weekly_summary;
-      if(evaluator_id) data.evaluator_id = evaluator_id;
+    if (data) {
+      if (score) { data.score = score; }
+      if (evaluate) { data.evaluate = evaluate; }
+      if (leader_next_week_plan) { data.leader_next_week_plan = leader_next_week_plan; }
+      if (myself_next_week_plan) { data.myself_next_week_plan = myself_next_week_plan; }
+      if (weekly_summary) { data.weekly_summary = weekly_summary; }
+      if (evaluator_id) { data.evaluator_id = evaluator_id; }
       await data.save();
-    }else {
+    } else {
       data = await this.ctx.model.Week.create({
         score, evaluate, startweekdate, endweekdate, evaluator_id, evaluated_id, week_id: uuid().replace(/\-/g, ''), leader_next_week_plan, myself_next_week_plan, weekly_summary
       });
     }
-    this.ctx.body = {status: 0, msg: '保存成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '保存成功'} as SuccessResult;
   }
 
   @put('/notice')
-  async updateNotice(){
-    let {notice_id} = this.ctx.request.body;
-    let data = await this.ctx.model.Notice.findOne({
+  async updateNotice() {
+    const {notice_id} = this.ctx.request.body;
+    const data = await this.ctx.model.Notice.findOne({
       where: {
         notice_id
       }
     });
-    if(!data){
-      return this.ctx.body = {status: 500, msg: '此提醒不存在'} as ErrorResult
+    if (!data) {
+      return this.ctx.body = {status: 500, msg: '此提醒不存在'} as ErrorResult;
     }
     data.isRead = 1;
     await data.save();
-    this.ctx.body = {status: 0, msg: '已读成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '已读成功'} as SuccessResult;
   }
 
   @get('/notices')
-  async getAllNotices(){ // 获取所有未读消息
-    let notices = await this.ctx.model.Notice.findAll({
+  async getAllNotices() { // 获取所有未读消息
+    const notices = await this.ctx.model.Notice.findAll({
       where: {
         isRead: 0,
       },
@@ -1253,42 +1253,42 @@ export class HomeController {
         ['createdAt', 'DESC']
       ],
     });
-    let noticeList = [];
-    for(let i in notices){
-      let userInfo = await this.ctx.model.Employee.findByPk(notices[i].reminder_id, {
+    const noticeList = [];
+    for (const i in notices) {
+      const userInfo = await this.ctx.model.Employee.findByPk(notices[i].reminder_id, {
         attributes: ['username', 'user_id', 'role', 'head_url']
       });
       noticeList.push({
         reminderInfo: userInfo,
         notice: notices[i]
-      })
+      });
     }
-    this.ctx.body = {status: 0, msg: '未读消息获取成功', result: {noticeList}} as SuccessResult
+    this.ctx.body = {status: 0, msg: '未读消息获取成功', result: {noticeList}} as SuccessResult;
   }
 
   @post('/notice')
-  async addNotice(){
-    let {reminder_id, message} = this.ctx.request.body;
+  async addNotice() {
+    const {reminder_id, message} = this.ctx.request.body;
     let data = await this.ctx.model.Notice.findOne({
       where: {
         message, reminder_id
       }
     });
-    if(data){
-      return this.ctx.body = {status: 500, msg: '你已经提醒过一次了'} as ErrorResult
+    if (data) {
+      return this.ctx.body = {status: 500, msg: '你已经提醒过一次了'} as ErrorResult;
     }
     data = await this.ctx.model.Notice.create({
       reminder_id, message, notice_id: uuid().replace(/\-/g, '')
     });
-    this.ctx.body = {status: 0, msg: '提醒成功'} as SuccessResult
+    this.ctx.body = {status: 0, msg: '提醒成功'} as SuccessResult;
   }
 
   @post('/uploadFile')
-  async uploadFile(){
+  async uploadFile() {
     const { ctx } = this;
     // 获取文件流
     const stream = await ctx.getFileStream();
-    let {userId} = ctx.query;
+    const {userId} = ctx.query;
     // 基础的目录
     const uploadBasePath = './../public/upload';
     // 生成文件名
@@ -1304,7 +1304,7 @@ export class HomeController {
         return true;
       }
     }
-    mkdirsSync(path.join(__dirname,uploadBasePath, dirname));
+    mkdirsSync(path.join(__dirname, uploadBasePath, dirname));
     // 生成写入路径
     const target = path.join(__dirname, uploadBasePath, dirname, filename);
     // 写入流
@@ -1332,64 +1332,64 @@ export class HomeController {
   }
 
   @post('/login')
-  async login(){
+  async login() {
     let {username, password, verifycode: captcha} = this.ctx.request.body;
-    if(!this.ctx.session.captcha){
+    if (!this.ctx.session.captcha) {
       return this.ctx.body = {
         msg: '验证码已过期',
         status: 500,
       } as ErrorResult;
     }
-    if(captcha.toUpperCase() !== this.ctx.session.captcha.toUpperCase()){
+    if (captcha.toUpperCase() !== this.ctx.session.captcha.toUpperCase()) {
       return this.ctx.body = {
         msg: '验证码错误',
         status: 500,
       } as ErrorResult;
     }
     password = md5(password);
-    let data = await this.ctx.model.Employee.findOne({
+    const data = await this.ctx.model.Employee.findOne({
       where: {username, password}
     });
-    if(!data){
+    if (!data) {
       return this.ctx.body = {
         msg: '用户名或密码错误',
         status: 500,
       } as ErrorResult;
     }
     const user = await this.service.getUser({id: data.user_id});
-    let jwt = new Jwt({
+    const jwt = new Jwt({
       userId: data.user_id
     });
-    let token = jwt.generateToken();
+    const token = jwt.generateToken();
     this.ctx.body = {status: 0, msg: '用户信息获取成功', result: user.result, token};
   }
 
   @get('/updateToken')
-  updateToken(){
-    let oldToken = this.ctx.headers.token;
-    let jwt1 = new Jwt(oldToken);
-    let result = jwt1.verifyToken();
-    let uuid = result.userId;
-    let jwt2 = new Jwt({
+  updateToken() {
+    const oldToken = this.ctx.headers.token;
+    const jwt1 = new Jwt(oldToken);
+    const result = jwt1.verifyToken();
+    const uuid = result.userId;
+    const jwt2 = new Jwt({
       userId: uuid
     });
-    let token = jwt2.generateToken();
+    const token = jwt2.generateToken();
     this.ctx.body = {status: 0, msg: 'token更新成功', token};
   }
 
   @post('/sendCode')
-  async sendCode(){
+  async sendCode() {
     try {
-      let {email: toEmail} = this.ctx.request.body;
-      let code = getCode(6);
-      let data = await sendEmail(toEmail, 'WEBLINKON验证码', `【纬领工作平台平台】您的邮箱验证码是：${code}。验证码有效期：1分钟。工作人员不会向您索要，索要验证码的都是骗子，如非本人操作请忽略。`);
-      this.ctx.session.yzm = code; //设置session captcha 为生成的验证码字符串
+      const {email: toEmail} = this.ctx.request.body;
+      const code = getCode(6);
+      const data = await sendEmail(toEmail, 'WEBLINKON验证码', `【纬领工作平台平台】您的邮箱验证码是：${code}。验证码有效期：1分钟。工作人员不会向您索要，索要验证码的都是骗子，如非本人操作请忽略。`);
+      this.ctx.session.yzm = code; // 设置session captcha 为生成的验证码字符串
       this.ctx.body = {
         status: 0,
         msg: '验证码发送成功',
         result: data
-      } as SuccessResult
-    }catch (e) {
+      } as SuccessResult;
+    } catch (e) {
       this.ctx.body = {
         msg: '邮箱发送失败',
         status: 500,
@@ -1399,16 +1399,16 @@ export class HomeController {
   }
 
   @post('/sendEmail')
-  async sendEmail(){
+  async sendEmail() {
     try {
-      let {email: toEmail, title, text, html} = this.ctx.request.body;
-      let data = await sendEmail(toEmail, title, text, html);
+      const {email: toEmail, title, text, html} = this.ctx.request.body;
+      const data = await sendEmail(toEmail, title, text, html);
       this.ctx.body = {
         status: 0,
         msg: '邮箱发送成功',
         result: data
-      } as SuccessResult
-    }catch (e) {
+      } as SuccessResult;
+    } catch (e) {
       this.ctx.body = {
         msg: '邮箱发送失败',
         status: 500,

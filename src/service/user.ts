@@ -1,6 +1,6 @@
 import {Context, inject, provide} from 'midway';
 import {IUserService, IUserOptions, LoginOptions, ErrorResult, SuccessResult} from '../interface';
-import md5 from 'blueimp-md5'
+import md5 from 'blueimp-md5';
 
 @provide('userService')
 export class UserService implements IUserService {
@@ -8,42 +8,42 @@ export class UserService implements IUserService {
   ctx: Context;
 
   async getUser(options: IUserOptions): Promise<ErrorResult | SuccessResult> {
-    let {id} = options;
-    let data = await this.ctx.model.Employee.findByPk(id, {
+    const {id} = options;
+    const data = await this.ctx.model.Employee.findByPk(id, {
       attributes: {exclude: ['password']}
     });
-    if(!data){
-      return {status: 500, msg: '用户不存在'}
+    if (!data) {
+      return {status: 500, msg: '用户不存在'};
     }
-    let jobData = await this.ctx.model.Job.findByPk(data.job_id, {
+    const jobData = await this.ctx.model.Job.findByPk(data.job_id, {
       attributes: ['job_id', 'job_name', 'department_id']
     });
-    let departmentInfo = {}
-    if(jobData){
+    let departmentInfo = {};
+    if (jobData) {
       departmentInfo = await this.ctx.model.Department.findByPk(jobData.department_id, {
         attributes: ['department_id', 'department_name']
       });
     }
-    return {status: 0, msg: '用户信息获取成功', result: {userInfo: data, jobInfo: jobData, departmentInfo}}
+    return {status: 0, msg: '用户信息获取成功', result: {userInfo: data, jobInfo: jobData, departmentInfo}};
   }
 
   async login(options: LoginOptions): Promise<ErrorResult | SuccessResult> {
     let {username, captcha, password} = options;
-    if(!this.ctx.session.captcha){
-      return {status: 500, msg: '验证码已过期'}
+    if (!this.ctx.session.captcha) {
+      return {status: 500, msg: '验证码已过期'};
     }
-    if(captcha.toUpperCase() !== this.ctx.session.captcha.toUpperCase()){
-      return {status: 500, msg: '验证码错误'}
+    if (captcha.toUpperCase() !== this.ctx.session.captcha.toUpperCase()) {
+      return {status: 500, msg: '验证码错误'};
     }
-    password = md5(password)
-    let data = await this.ctx.model.Employee.findOne({
+    password = md5(password);
+    const data = await this.ctx.model.Employee.findOne({
       where: {
         username, password
       }
     });
-    if(!data){
-      return {status: 500, msg: '用户名或密码错误'}
+    if (!data) {
+      return {status: 500, msg: '用户名或密码错误'};
     }
-    return {status: 0, msg: '登录成功', result: {userInfo: data}}
+    return {status: 0, msg: '登录成功', result: {userInfo: data}};
   }
 }

@@ -1,7 +1,7 @@
 import { EggAppConfig, EggAppInfo, PowerPartial } from 'midway';
 const fs = require('fs');
 
-export type DefaultConfig = PowerPartial<EggAppConfig>
+export type DefaultConfig = PowerPartial<EggAppConfig>;
 
 export default (appInfo: EggAppInfo) => {
   const config = {} as DefaultConfig;
@@ -35,15 +35,15 @@ export default (appInfo: EggAppInfo) => {
     dialect: 'mysql',
     host: '192.168.0.79',
     port: 3306,
-    username: "root",
+    username: 'root',
     password: 'itnihao',
     database: 'work',
-    timezone: '+08:00', //东八时区
+    timezone: '+08:00', // 东八时区
     logging: false, // 不打印SQL日志
     define: {
       timestamps: true,
-      createdAt: "createdAt",  //自定义时间戳
-      updatedAt: "updatedAt", // 自定义时间戳
+      createdAt: 'createdAt',  // 自定义时间戳
+      updatedAt: 'updatedAt', // 自定义时间戳
     },
   };
   config.static = {
