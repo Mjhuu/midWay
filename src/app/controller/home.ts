@@ -360,7 +360,7 @@ export class HomeController {
     const peopleList = [];
     for (const pIndex in peoples) {
       const userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
-        attributes: ['username', 'user_id', 'head_url']
+        attributes: ['username', 'user_id', 'head_url', 'leaveOffice', 'email']
       });
       peopleList.push({
         userInfo,
