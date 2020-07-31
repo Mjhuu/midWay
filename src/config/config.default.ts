@@ -25,7 +25,7 @@ export default (appInfo: EggAppInfo) => {
     csrf: {
       enable: false,
     },
-    domainWhiteList: ['http://192.168.0.102:3000']
+    domainWhiteList: ['http://192.168.0.109:3000']
   };
   config.cors = {
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
@@ -51,6 +51,7 @@ export default (appInfo: EggAppInfo) => {
   };
   config.multipart = {
     fileSize: '200mb', // 默认大小为10Mb
+    fileExtensions: [ '.pdf', '.doc', '.docx', '.xlsx', '.xls', '.txt', '' ]
   };
   config.session = {
     key: 'WEBLINKON_SESS',

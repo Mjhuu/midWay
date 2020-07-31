@@ -491,7 +491,7 @@ export class HomeController {
 
   @put('/project')
   async updateProject() {
-    const {project_id, bgcolor, project_name, project_description, endtime, starttime, status} = this.ctx.request.body;
+    const {project_id, bgcolor, project_name, project_description, endtime, starttime, status, fileList = ''} = this.ctx.request.body;
     const project = await this.ctx.model.Project.findOne({
       where: {project_id}
     });
@@ -504,6 +504,7 @@ export class HomeController {
     project.endtime = endtime;
     project.starttime = starttime;
     project.status = status;
+    project.fileList = fileList ? JSON.stringify(fileList) : fileList;
     await project.save();
     this.ctx.body = {status: 0, msg: '项目保存成功'} as SuccessResult;
   }
@@ -1115,7 +1116,7 @@ export class HomeController {
 
   @put('/job_together')
   async updateTeamWork() {
-    const {tw_id, twInfo} = this.ctx.request.body;
+    const {tw_id, twInfo, fileInfo = '', type = 1} = this.ctx.request.body;
     const teamWork = await this.ctx.model.Teamwork.findOne({
       where: {tw_id}
     });
@@ -1124,6 +1125,15 @@ export class HomeController {
     }
     for (const i in twInfo) {
       teamWork[i] = twInfo[i];
+    }
+    if (fileInfo) {
+      if(type === 1){
+        let oldList = teamWork.fileList ? JSON.parse(teamWork.fileList) : [];
+        oldList.push(fileInfo)
+        teamWork.fileList = JSON.stringify(oldList);
+      }else {
+        teamWork.fileList = JSON.stringify(fileInfo);
+      }
     }
     await teamWork.save();
     this.ctx.body = {status: 0, msg: '协同信息修改成功'} as SuccessResult;
@@ -1157,7 +1167,7 @@ export class HomeController {
 
   @put('/job_logging')
   async updateJobLogging() {
-    const {tf_id, tfInfo} = this.ctx.request.body;
+    const {tf_id, tfInfo, fileInfo = '', type = 1} = this.ctx.request.body;
     const taskfirst = await this.ctx.model.Taskfirst.findOne({
       where: {tf_id}
     });
@@ -1166,6 +1176,15 @@ export class HomeController {
     }
     for (const i in tfInfo) {
       taskfirst[i] = tfInfo[i];
+    }
+    if (fileInfo) {
+      if(type === 1){
+        let oldList = taskfirst.fileList ? JSON.parse(taskfirst.fileList) : [];
+        oldList.push(fileInfo)
+        taskfirst.fileList = JSON.stringify(oldList);
+      }else {
+        taskfirst.fileList = JSON.stringify(fileInfo);
+      }
     }
     await taskfirst.save();
     this.ctx.body = {status: 0, msg: '任务信息修改成功'} as SuccessResult;
@@ -1202,7 +1221,7 @@ export class HomeController {
 
   @post('/week')
   async addWeekEvaluate() {
-    let {score = 5, evaluate = '', startweekdate, endweekdate, evaluator_id, evaluated_id, leader_next_week_plan = '', myself_next_week_plan = '', weekly_summary = ''} = this.ctx.request.body;
+    let {score = 5, evaluate = '', startweekdate, endweekdate, evaluator_id, evaluated_id, leader_next_week_plan = '', myself_next_week_plan = '', weekly_summary = '', fileInfo = '', type = 1} = this.ctx.request.body;
     startweekdate = new Date(startweekdate);
     endweekdate = new Date(endweekdate);
     let data = await this.ctx.model.Week.findOne({
@@ -1217,6 +1236,15 @@ export class HomeController {
       if (myself_next_week_plan) { data.myself_next_week_plan = myself_next_week_plan; }
       if (weekly_summary) { data.weekly_summary = weekly_summary; }
       if (evaluator_id) { data.evaluator_id = evaluator_id; }
+      if (fileInfo) {
+        if(type === 1){
+          let oldList = data.fileList ? JSON.parse(data.fileList) : [];
+          oldList.push(fileInfo)
+          data.fileList = JSON.stringify(oldList);
+        }else {
+          data.fileList = JSON.stringify(fileInfo);
+        }
+      }
       await data.save();
     } else {
       data = await this.ctx.model.Week.create({
