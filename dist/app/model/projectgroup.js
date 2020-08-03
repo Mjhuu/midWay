@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = (app) => {
+    const { STRING, INTEGER, } = app.Sequelize;
+    const Projectgroup = app.model.define('projectgroup', {
+        user_id: { type: STRING(50), primaryKey: true },
+        project_id: STRING(50),
+        user_role: { type: INTEGER, allowNull: false }
+    }, {
+        freezeTableName: true
+    });
+    return Projectgroup;
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvamVjdGdyb3VwLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2FwcC9tb2RlbC9wcm9qZWN0Z3JvdXAudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFFQSxrQkFBZSxDQUFDLEdBQWdCLEVBQUUsRUFBRTtJQUNoQyxNQUFNLEVBQUUsTUFBTSxFQUFFLE9BQU8sR0FBRyxHQUFHLEdBQUcsQ0FBQyxTQUFTLENBQUM7SUFFM0MsTUFBTSxZQUFZLEdBQUcsR0FBRyxDQUFDLEtBQUssQ0FBQyxNQUFNLENBQUMsY0FBYyxFQUFFO1FBQ2xELE9BQU8sRUFBRSxFQUFFLElBQUksRUFBRSxNQUFNLENBQUMsRUFBRSxDQUFDLEVBQUUsVUFBVSxFQUFFLElBQUksRUFBRTtRQUMvQyxVQUFVLEVBQUUsTUFBTSxDQUFDLEVBQUUsQ0FBQztRQUN0QixTQUFTLEVBQUUsRUFBQyxJQUFJLEVBQUUsT0FBTyxFQUFFLFNBQVMsRUFBRSxLQUFLLEVBQUM7S0FDL0MsRUFBRTtRQUNDLGVBQWUsRUFBRSxJQUFJO0tBQ3hCLENBQUMsQ0FBQztJQUVILE9BQU8sWUFBWSxDQUFDO0FBQ3hCLENBQUMsQ0FBQyJ9

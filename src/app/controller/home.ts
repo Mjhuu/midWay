@@ -1221,7 +1221,7 @@ export class HomeController {
 
   @post('/week')
   async addWeekEvaluate() {
-    let {score = 5, evaluate = '', startweekdate, endweekdate, evaluator_id, evaluated_id, leader_next_week_plan = '', myself_next_week_plan = '', weekly_summary = '', fileInfo = '', type = 1} = this.ctx.request.body;
+    let {score, evaluate = '', startweekdate, endweekdate, evaluator_id, evaluated_id, leader_next_week_plan = '', myself_next_week_plan = '', weekly_summary = '', fileInfo = '', type = 1} = this.ctx.request.body;
     startweekdate = new Date(startweekdate);
     endweekdate = new Date(endweekdate);
     let data = await this.ctx.model.Week.findOne({
@@ -1247,9 +1247,15 @@ export class HomeController {
       }
       await data.save();
     } else {
-      data = await this.ctx.model.Week.create({
-        score, evaluate, startweekdate, endweekdate, evaluator_id, evaluated_id, week_id: uuid().replace(/\-/g, ''), leader_next_week_plan, myself_next_week_plan, weekly_summary
-      });
+      if(score){
+        data = await this.ctx.model.Week.create({
+          score, evaluate, startweekdate, endweekdate, evaluator_id, evaluated_id, week_id: uuid().replace(/\-/g, ''), leader_next_week_plan, myself_next_week_plan, weekly_summary
+        });
+      }else{
+        data = await this.ctx.model.Week.create({
+          evaluate, startweekdate, endweekdate, evaluator_id, evaluated_id, week_id: uuid().replace(/\-/g, ''), leader_next_week_plan, myself_next_week_plan, weekly_summary
+        });
+      }
     }
     this.ctx.body = {status: 0, msg: '保存成功'} as SuccessResult;
   }

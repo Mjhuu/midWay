@@ -1,0 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = (app) => {
+    const { STRING, DATE, TEXT, FLOAT } = app.Sequelize;
+    const Week = app.model.define('week', {
+        week_id: { type: STRING(50), primaryKey: true },
+        startweekdate: DATE,
+        endweekdate: DATE,
+        evaluator_id: STRING(50),
+        evaluated_id: STRING(50),
+        score: FLOAT,
+        evaluate: TEXT,
+        leader_next_week_plan: TEXT,
+        myself_next_week_plan: TEXT,
+        weekly_summary: TEXT,
+        fileList: TEXT,
+    }, {
+        freezeTableName: true
+    });
+    return Week;
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2Vlay5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9hcHAvbW9kZWwvd2Vlay50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUVBLGtCQUFlLENBQUMsR0FBZ0IsRUFBRSxFQUFFO0lBQ2hDLE1BQU0sRUFBRSxNQUFNLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxLQUFLLEVBQUUsR0FBRyxHQUFHLENBQUMsU0FBUyxDQUFDO0lBRXBELE1BQU0sSUFBSSxHQUFHLEdBQUcsQ0FBQyxLQUFLLENBQUMsTUFBTSxDQUFDLE1BQU0sRUFBRTtRQUNsQyxPQUFPLEVBQUUsRUFBRSxJQUFJLEVBQUUsTUFBTSxDQUFDLEVBQUUsQ0FBQyxFQUFFLFVBQVUsRUFBRSxJQUFJLEVBQUU7UUFDL0MsYUFBYSxFQUFFLElBQUk7UUFDbkIsV0FBVyxFQUFFLElBQUk7UUFDakIsWUFBWSxFQUFFLE1BQU0sQ0FBQyxFQUFFLENBQUM7UUFDeEIsWUFBWSxFQUFFLE1BQU0sQ0FBQyxFQUFFLENBQUM7UUFDeEIsS0FBSyxFQUFFLEtBQUs7UUFDWixRQUFRLEVBQUUsSUFBSTtRQUNkLHFCQUFxQixFQUFFLElBQUk7UUFDM0IscUJBQXFCLEVBQUUsSUFBSTtRQUMzQixjQUFjLEVBQUUsSUFBSTtRQUNwQixRQUFRLEVBQUUsSUFBSTtLQUNqQixFQUFFO1FBQ0MsZUFBZSxFQUFFLElBQUk7S0FDeEIsQ0FBQyxDQUFDO0lBRUgsT0FBTyxJQUFJLENBQUM7QUFDaEIsQ0FBQyxDQUFDIn0=

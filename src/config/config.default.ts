@@ -25,7 +25,7 @@ export default (appInfo: EggAppInfo) => {
     csrf: {
       enable: false,
     },
-    domainWhiteList: ['http://192.168.0.109:3000']
+    domainWhiteList: ['http://192.168.0.103:3000', 'http://chain.weblinkon.com:7003', 'http://192.168.0.79:7003']
   };
   config.cors = {
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
