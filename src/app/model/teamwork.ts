@@ -16,7 +16,7 @@ export default (app: Application) => {
         isrefuse: {type: INTEGER, allowNull: false, defaultValue: 0}, // 0 - 未拒绝 1-已拒绝 2-接收
         urgent: {type: INTEGER, allowNull: false},
         executor_id: STRING(50),
-        fileList: TEXT,
+        fileList: {type: TEXT, defaultValue: '[]'},
     }, {
         freezeTableName: true
     });

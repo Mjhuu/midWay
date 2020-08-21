@@ -10,7 +10,7 @@ export default (app: Application) => {
         project_description: STRING(255),
         bgcolor: STRING(20),
         starttime: DATE,
-        fileList: TEXT,
+        fileList: {type: TEXT, defaultValue: '[]'},
         endtime: DATE,
         status: {type: INTEGER, allowNull: false}
     }, {

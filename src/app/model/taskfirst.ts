@@ -16,7 +16,7 @@ export default (app: Application) => {
         executor_id: STRING(50),
         project_id: STRING(50),
         description: TEXT,
-        fileList: TEXT,
+        fileList: {type: TEXT, defaultValue: '[]'},
     }, {
         freezeTableName: true
     });
