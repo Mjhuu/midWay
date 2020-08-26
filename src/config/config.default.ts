@@ -25,7 +25,7 @@ export default (appInfo: EggAppInfo) => {
     csrf: {
       enable: false,
     },
-    domainWhiteList: ['http://192.168.0.103:3000', 'http://chain.weblinkon.com:7003', 'http://192.168.0.79:7003']
+    domainWhiteList: ['http://192.168.0.105:3000', 'http://chain.weblinkon.com:7003', 'http://192.168.0.79:7003']
   };
   config.cors = {
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
@@ -51,7 +51,7 @@ export default (appInfo: EggAppInfo) => {
   };
   config.multipart = {
     fileSize: '200mb', // 默认大小为10Mb
-    fileExtensions: [ '.pdf', '.doc', '.docx', '.xlsx', '.xls', '.txt', '.ppt' ]
+    fileExtensions: [ '.pdf', '.doc', '.docx', '.xlsx', '.xls', '.txt', '.ppt', '.pptx' ]
   };
   config.session = {
     key: 'WEBLINKON_SESS',
