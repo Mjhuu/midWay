@@ -1,6 +1,7 @@
 import { Context, controller, get, inject, provide, post, put } from 'midway';
 import {ErrorResult, IUserService, SuccessResult} from '../../interface';
 import {uuid} from 'uuidv4';
+import {normalLog, actionOtherLog} from "../decorator";
 const md5 = require('md5-nodejs');
 
 @provide()
@@ -14,6 +15,7 @@ export class UserController {
   service: IUserService;
 
   @put('/password')
+  @normalLog('进行了修改自己账号密码的操作')
   async updatePwd() {
     let {userId, password, verifycode: yzm} = this.ctx.request.body;
     if (Number(yzm) !== Number(this.ctx.session.yzm)) {
@@ -41,6 +43,11 @@ export class UserController {
   }
 
   @put('/reset_password')
+  @actionOtherLog({
+    first: '进行了重置',
+    second: '的密码操作',
+    userId: 'userId'
+  })
   async resetPwd() {
     let {userId, password} = this.ctx.request.body;
     const data = await this.ctx.model.Employee.findOne({
@@ -62,6 +69,7 @@ export class UserController {
   }
 
   @put('/email')
+  @normalLog('进行了修改自己邮箱的操作')
   async updateEmail() {
     const {userId, email, verifycode: yzm} = this.ctx.request.body;
     if (Number(yzm) !== Number(this.ctx.session.yzm)) {
@@ -92,7 +100,9 @@ export class UserController {
     const user = await this.service.getUser({id: data.user_id});
     this.ctx.body = user;
   }
+
   @put('/')
+  @normalLog('进行了修改用户信息的操作')
   async updateUser() {
     const {userId, username, mobile, telphone, head_url, gender, email = '', job_id = '', role = '', joinTime = '', leaveOffice} = this.ctx.request.body;
     const data = await this.ctx.model.Employee.findOne({
@@ -150,6 +160,7 @@ export class UserController {
   }
 
   @post('/')
+  @normalLog('进行了新增员工的操作')
   async addUser(): Promise<ErrorResult | SuccessResult> {
     let {headUrl, password, role, email, username, telphone, mobile, joinTime, jobId, gender} = this.ctx.request.body;
     joinTime = new Date(joinTime);

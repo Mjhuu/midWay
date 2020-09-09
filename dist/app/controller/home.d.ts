@@ -5,6 +5,10 @@ export declare class HomeController {
     ctx: Context;
     service: IUserService;
     index(): Promise<void>;
+    getLogs(): Promise<void>;
+    assessmentLogs(): Promise<void>;
+    addAssessment(): Promise<void>;
+    assessment(): Promise<void>;
     captcha(): Promise<void>;
     /*********************部门Api************************/
     addDepartment(): Promise<ErrorResult>;

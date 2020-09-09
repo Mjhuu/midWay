@@ -32,6 +32,16 @@ module.exports = options => {
                 if(user.leaveOffice === 1){
                     return ctx.body = {status: 403, msg: '你已离职，无权使用系统'} as ErrorResult;
                 }
+                // 暂时不需要
+               /* ctx.model.Log.create({
+                    log_id: uuid().replace(/\-/g, ''),
+                    user_id: userid,
+                    ip: ctx.request.ip,
+                    do_thing: `调用了（${ctx.url}）Api`,
+                    type: JobType.callApi
+                }).then(data => {
+                    console.log('log记录已入库');
+                }).catch(e => console.error(e))*/
                 await next();
             }
         } else {

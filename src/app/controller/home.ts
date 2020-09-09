@@ -2,6 +2,8 @@ import {Context, inject, controller, get, post, del, put, provide, } from 'midwa
 import {AddDepartmentOptions, ErrorResult, IUserService, SuccessResult} from '../../interface';
 import { uuid } from 'uuidv4';
 import {Jwt} from './../jwt/jwt';
+import {actionOtherLog} from "../decorator";
+import {JobType} from "../common";
 const svgCaptcha = require('svg-captcha');
 const path = require('path');
 const fs = require('fs');
@@ -72,6 +74,105 @@ export class HomeController {
     await this.ctx.render('index');
   }
 
+  // 获取日志
+  @get('/logs')
+  async getLogs() {
+    let logs = await this.ctx.model.Log.findAll({
+      order: [
+        ['createdAt', 'DESC']
+      ],
+    });
+    let logList = [];
+    for(let i in logs){
+      let user_id = logs[i].user_id;
+      let userInfo = await this.ctx.model.Employee.findByPk(user_id, {
+        attributes: ['username']
+      });
+      logList.push({
+        userInfo,
+        logInfo: logs[i]
+      })
+    }
+    this.ctx.body = {
+      status: 0, msg: '获取成功', result: {
+        logList
+      }
+    } as SuccessResult;
+  }
+
+  @get('/assessmentLogs')
+  async assessmentLogs() {
+    let assessments = await this.ctx.model.Assessment.findAll({
+      order: [
+        ['createdAt', 'DESC']
+      ],
+    });
+    let assessmentList = [];
+    for(let i in assessments){
+      let user_id = assessments[i].user_id;
+      let userInfo = await this.ctx.model.Employee.findByPk(user_id, {
+        attributes: ['username']
+      });
+      assessmentList.push({
+        userInfo,
+        assessmentInfo: assessments[i]
+      })
+    }
+    this.ctx.body = {
+      status: 0, msg: '获取成功', result: {
+        assessmentList
+      }
+    } as SuccessResult;
+  }
+
+  // 新增月度考核记录
+  @post('/assessment')
+  async addAssessment() {
+    const {userid} = this.ctx.headers;
+    const {type = 1, dateStart, dateEnd, month, year} = this.ctx.request.body;
+    await this.ctx.model.Assessment.create({
+      assessment_id: uuid().replace(/\-/g, ''),
+      user_id: userid,
+      month,
+      year,
+      type,
+      beginDate: dateStart,
+      endDate: dateEnd
+    });
+    // 入库结束
+    this.ctx.body = {
+      status: 0, msg: '考核记录已入库', result: {}
+    } as SuccessResult;
+  }
+
+  // 获取月度考核记录
+  @get('/assessment')
+  async assessment() {
+    const {userid} = this.ctx.headers;
+    const {dateStart, dateEnd, month, year} = this.ctx.query;
+    let assessments = await this.ctx.model.query(`SELECT employee.username,employee.user_id,IFNULL(t1.count, 0) veryGoodCount,IFNULL(t2.count, 0) goodCount,IFNULL(t3.count, 0) dontPass FROM employee LEFT JOIN ( SELECT evaluated_id, score, COUNT(*) count FROM week WHERE score = 5 AND startweekdate >= '${dateStart}' AND endweekdate <= '${dateEnd}' GROUP BY evaluated_id ) t1 ON t1.evaluated_id = employee.user_id LEFT JOIN ( SELECT evaluated_id, score, COUNT(*) count FROM week WHERE score = 4.5 AND startweekdate >= '${dateStart}' AND endweekdate <= '${dateEnd}' GROUP BY evaluated_id ) t2 ON t2.evaluated_id = employee.user_id LEFT JOIN ( SELECT evaluated_id, score, COUNT(*) count FROM week WHERE score < 4 AND startweekdate >= '${dateStart}' AND endweekdate <= '${dateEnd}' GROUP BY evaluated_id ) t3 ON t3.evaluated_id = employee.user_id GROUP BY employee.user_id`,{ type: this.ctx.model.QueryTypes.SELECT});
+    // 将查看信息入库
+    this.ctx.model.Employee.findByPk(userid).then(user => {
+      this.ctx.model.Assessment.create({
+        assessment_id: uuid().replace(/\-/g, ''),
+        user_id: userid,
+        month,
+        year,
+        beginDate: dateStart,
+        endDate: dateEnd
+      }).then(data => {
+        console.log('记录已入库');
+      })
+    })
+    // 入库结束
+    this.ctx.body = {
+      status: 0, msg: '考核记录获取成功', result: {
+        title: `${year}年度${month}月【${dayjs(dateStart).format('YYYY-MM-DD')}--${dayjs(dateEnd).format('YYYY-MM-DD')}】，员工考核记录汇总表`,
+        assessments
+      }
+    } as SuccessResult;
+  }
+
   // 获取验证码
   @get('/captcha')
   async captcha() {
@@ -133,6 +234,11 @@ export class HomeController {
   }
 
   @del('/user')
+  @actionOtherLog({
+    first: '进行了删除',
+    second: '员工操作',
+    userId: 'userId'
+  })
   async delUser() {
     const {userId} = this.ctx.request.body;
     const user = await this.ctx.model.Employee.findOne({
@@ -1397,6 +1503,16 @@ export class HomeController {
       userId: data.user_id
     });
     const token = jwt.generateToken();
+    // 登录日志
+    this.ctx.model.Log.create({
+      log_id: uuid().replace(/\-/g, ''),
+      user_id: data.user_id,
+      ip: this.ctx.request.ip,
+      do_thing: '进行了登录操作',
+      type: JobType.login
+    }).then(data => {
+      console.log('log记录已入库');
+    }).catch(e => console.error(e))
     this.ctx.body = {status: 0, msg: '用户信息获取成功', result: user.result, token};
   }
 
