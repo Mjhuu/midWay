@@ -1,6 +1,12 @@
 import {Context} from 'midway';
 import {ErrorResult} from '../../interface';
 import {Jwt} from '../jwt/jwt';
+import {
+    localServerIpAndPort,
+    localWebIpAndPort,
+    onlineServerDomainAndPort,
+    onlineServerIpAndPort
+} from "../../otherConfig";
 
 module.exports = options => {
     return async function jwt(ctx: Context, next) {
@@ -8,7 +14,7 @@ module.exports = options => {
             if (!ctx.headers.referer) {
                 return ctx.body = {status: 403, msg: '只能在纬领工作台使用此接口'} as ErrorResult;
             }
-            if (!ctx.headers.referer.includes('http://192.168.0.105:3000') && !ctx.headers.referer.includes('http://192.168.0.105:7003') && !ctx.headers.referer.includes('http://192.168.0.79:7003') && !ctx.headers.referer.includes('http://chain.weblinkon.com:7003')) {
+            if (!ctx.headers.referer.includes(localWebIpAndPort) && !ctx.headers.referer.includes(localServerIpAndPort) && !ctx.headers.referer.includes(onlineServerIpAndPort) && !ctx.headers.referer.includes(onlineServerDomainAndPort)) {
                 return ctx.body = {status: 403, msg: '非法请求'} as ErrorResult;
             }
             const {token, userid} = ctx.headers;

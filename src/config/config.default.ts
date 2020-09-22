@@ -1,4 +1,10 @@
 import { EggAppConfig, EggAppInfo, PowerPartial } from 'midway';
+import {
+  localWebIpAndPort,
+  mysqlHostAndPassword,
+  onlineServerDomainAndPort,
+  onlineServerIpAndPort
+} from "../otherConfig";
 const fs = require('fs');
 
 export type DefaultConfig = PowerPartial<EggAppConfig>;
@@ -6,7 +12,11 @@ export type DefaultConfig = PowerPartial<EggAppConfig>;
 export default (appInfo: EggAppInfo) => {
   const config = {} as DefaultConfig;
 
-  // use for cookie sign key, should change to your own and keep security
+// 注意，开启此模式后，应用就默认自己处于反向代理之后，
+// 会支持通过解析约定的请求头来获取用户真实的 IP，协议和域名。
+// 如果你的服务未部署在反向代理之后，请不要开启此配置，以防被恶意用户伪造请求 IP 等信息。
+  config.proxy = true;
+
   config.keys = appInfo.name + '_{{keys}}';
   config.siteFile = {
     '/favicon.ico': fs.readFileSync('favicon.ico'),
@@ -25,7 +35,7 @@ export default (appInfo: EggAppInfo) => {
     csrf: {
       enable: false,
     },
-    domainWhiteList: ['http://192.168.0.105:3000', 'http://chain.weblinkon.com:7003', 'http://192.168.0.79:7003']
+    domainWhiteList: [localWebIpAndPort, onlineServerIpAndPort, onlineServerDomainAndPort]
   };
   config.cors = {
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
@@ -33,10 +43,10 @@ export default (appInfo: EggAppInfo) => {
   };
   config.sequelize = {
     dialect: 'mysql',
-    host: '192.168.0.79',
+    host: mysqlHostAndPassword.host,
     port: 3306,
     username: 'root',
-    password: 'itnihao',
+    password: mysqlHostAndPassword.password,
     database: 'work',
     timezone: '+08:00', // 东八时区
     logging: false, // 不打印SQL日志
