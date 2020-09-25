@@ -4,17 +4,23 @@ import {Jwt} from '../jwt/jwt';
 import {
     localServerIpAndPort,
     localWebIpAndPort,
-    onlineServerDomainAndPort,
+    onlineServerDomainAndPort, onlineServerHttpsDomainAndPort,
     onlineServerIpAndPort
 } from "../../otherConfig";
 
 module.exports = options => {
     return async function jwt(ctx: Context, next) {
+        const {clientip} = ctx.headers;
+        /*修改IP开始*/
+        if(clientip && clientip !== 'null'){
+            ctx.request.ip = clientip;
+        }
+        /*修改IP结束*/
         if (ctx.url !== '/' && !ctx.url.includes('/login') && !ctx.url.includes('/captcha')) {
             if (!ctx.headers.referer) {
                 return ctx.body = {status: 403, msg: '只能在纬领工作台使用此接口'} as ErrorResult;
             }
-            if (!ctx.headers.referer.includes(localWebIpAndPort) && !ctx.headers.referer.includes(localServerIpAndPort) && !ctx.headers.referer.includes(onlineServerIpAndPort) && !ctx.headers.referer.includes(onlineServerDomainAndPort)) {
+            if (!ctx.headers.referer.includes(localWebIpAndPort) && !ctx.headers.referer.includes(localServerIpAndPort) && !ctx.headers.referer.includes(onlineServerIpAndPort) && !ctx.headers.referer.includes(onlineServerDomainAndPort) && !ctx.headers.referer.includes(onlineServerHttpsDomainAndPort)) {
                 return ctx.body = {status: 403, msg: '非法请求'} as ErrorResult;
             }
             const {token, userid} = ctx.headers;

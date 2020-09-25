@@ -2,7 +2,7 @@ import { EggAppConfig, EggAppInfo, PowerPartial } from 'midway';
 import {
   localWebIpAndPort,
   mysqlHostAndPassword,
-  onlineServerDomainAndPort,
+  onlineServerDomainAndPort, onlineServerHttpsDomainAndPort,
   onlineServerIpAndPort
 } from "../otherConfig";
 const fs = require('fs');
@@ -35,7 +35,7 @@ export default (appInfo: EggAppInfo) => {
     csrf: {
       enable: false,
     },
-    domainWhiteList: [localWebIpAndPort, onlineServerIpAndPort, onlineServerDomainAndPort]
+    domainWhiteList: [localWebIpAndPort, onlineServerIpAndPort, onlineServerDomainAndPort, onlineServerHttpsDomainAndPort]
   };
   config.cors = {
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
