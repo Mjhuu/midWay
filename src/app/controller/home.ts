@@ -94,7 +94,7 @@ export class HomeController {
     try {
       const {email: toEmail} = this.ctx.request.body;
       const code = getCode(6);
-      const data = await sendEmail(toEmail, 'WEBLINKON验证码', `【纬领工作平台平台】您的邮箱验证码是：${code}。验证码有效期：1分钟。工作人员不会向您索要，索要验证码的都是骗子，如非本人操作请忽略。`);
+      const data = await sendEmail(toEmail, 'WEBLINKON验证码', `【纬领工作平台】您的邮箱验证码是：${code}。验证码有效期：1分钟。工作人员不会向您索要，索要验证码的都是骗子，如非本人操作请忽略。`);
       this.ctx.session.yzm = code; // 设置session captcha 为生成的验证码字符串
       this.ctx.body = {
         status: 0,

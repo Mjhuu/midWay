@@ -61,7 +61,7 @@ export default (appInfo: EggAppInfo) => {
   };
   config.multipart = {
     fileSize: '200mb', // 默认大小为10Mb
-    fileExtensions: [ '.pdf', '.doc', '.docx', '.xlsx', '.xls', '.txt', '.ppt', '.pptx' ]
+    fileExtensions: [ '.pdf', '.doc', '.docx', '.xlsx', '.xls', '.txt', '.ppt', '.pptx', '.md' ]
   };
   config.session = {
     key: 'WEBLINKON_SESS',
