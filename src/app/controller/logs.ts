@@ -22,7 +22,7 @@ export class LogsController {
                 attributes: ['username']
             });
             logList.push({
-                userInfo,
+                userInfo: userInfo || {username: '已删除'},
                 logInfo: logs[i]
             })
         }
