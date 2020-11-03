@@ -70,7 +70,8 @@ export class ProjectController {
             const userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
                 attributes: ['username', 'user_id', 'head_url', 'leaveOffice', 'email']
             });
-            peopleList.push({
+            // 如果用户存在则添加
+            userInfo && peopleList.push({
                 userInfo,
                 groupInfo: peoples[pIndex]
             });
@@ -104,9 +105,9 @@ export class ProjectController {
             });
             twList.push({
                 taskFirst,
-                tfUserInfo,
-                twUserInfo,
-                creatorInfo,
+                tfUserInfo: tfUserInfo || {username: '已删除', user_id: 'null', role: 3},
+                twUserInfo: twUserInfo || {username: '已删除', user_id: 'null', role: 3},
+                creatorInfo: creatorInfo || {username: '已删除', user_id: 'null', role: 3},
                 teamWork: teamWorks[tIndex]
             });
         }
@@ -127,8 +128,8 @@ export class ProjectController {
                 attributes: ['username', 'user_id']
             });
             tfList.push({
-                tfUserInfo,
-                creatorInfo,
+                tfUserInfo: tfUserInfo || {username: '已删除', user_id: 'null', role: 3},
+                creatorInfo: creatorInfo || {username: '已删除', user_id: 'null', role: 3},
                 taskFirst: taskFirsts[tfIndex]
             });
         }

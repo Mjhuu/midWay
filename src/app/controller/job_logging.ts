@@ -220,9 +220,9 @@ export class JobLoggingController {
             const project = await this.ctx.model.Project.findByPk(teamWorks[tIndex].project_id);
             twList.push({
                 taskFirst,
-                tfUserInfo,
-                twUserInfo,
-                creatorInfo,
+                tfUserInfo: tfUserInfo || {username: '已删除', user_id: 'null', role: 3},
+                twUserInfo: twUserInfo || {username: '已删除', user_id: 'null', role: 3},
+                creatorInfo: creatorInfo || {username: '已删除', user_id: 'null', role: 3},
                 project,
                 teamWork: teamWorks[tIndex]
             });
@@ -261,13 +261,13 @@ export class JobLoggingController {
                     attributes: ['username', 'user_id', 'head_url', 'role']
                 });
                 twList1.push({
-                    twUserInfo,
+                    twUserInfo: twUserInfo || {username: '已删除', user_id: 'null', role: 3},
                     teamWork: teamWorks1[tIndex]
                 });
             }
             tfList.push({
-                tfUserInfo,
-                creatorInfo,
+                tfUserInfo: tfUserInfo || {username: '已删除', user_id: 'null', role: 3},
+                creatorInfo: creatorInfo || {username: '已删除', user_id: 'null', role: 3},
                 project: project1,
                 taskFirst: taskFirsts[tfIndex],
                 twList: twList1
