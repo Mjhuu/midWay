@@ -34,7 +34,7 @@ export class ProjectController {
                 const userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
                     attributes: ['username', 'user_id', 'head_url']
                 });
-                peopleList.push({
+                userInfo && peopleList.push({
                     userInfo,
                     groupInfo: peoples[pIndex]
                 });
@@ -264,7 +264,7 @@ export class ProjectController {
                 const userInfo = await this.ctx.model.Employee.findByPk(peoples[pIndex].user_id, {
                     attributes: ['username', 'user_id', 'head_url']
                 });
-                peopleList.push({
+                userInfo && peopleList.push({
                     userInfo,
                     groupInfo: peoples[pIndex]
                 });

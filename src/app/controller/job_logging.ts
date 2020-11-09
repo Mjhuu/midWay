@@ -108,9 +108,9 @@ export class JobLoggingController {
             });
             twList.push({
                 taskFirst,
-                tfUserInfo,
-                twUserInfo,
-                creatorInfo,
+                tfUserInfo: tfUserInfo || {username: '已删除', user_id: 'null', role: 3},
+                twUserInfo: twUserInfo || {username: '已删除', user_id: 'null', role: 3},
+                creatorInfo: creatorInfo || {username: '已删除', user_id: 'null', role: 3},
                 teamWork: teamWorks[tIndex]
             });
         }
@@ -132,8 +132,8 @@ export class JobLoggingController {
                 attributes: ['username', 'user_id']
             });
             tfList.push({
-                tfUserInfo,
-                creatorInfo,
+                tfUserInfo: tfUserInfo || {username: '已删除', user_id: 'null', role: 3},
+                creatorInfo: creatorInfo || {username: '已删除', user_id: 'null', role: 3},
                 taskFirst: taskFirsts[tfIndex]
             });
         }
