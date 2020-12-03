@@ -37,9 +37,9 @@ export const onlineMysqlHostAndPassword: mysqlConfig = {
     password: 'itnihao666',
 }
 // 本地测试环境
-// export const mysqlHostAndPassword: mysqlConfig = localMysqlHostAndPassword;
+export const mysqlHostAndPassword: mysqlConfig = localMysqlHostAndPassword;
 // 线上部署环境
-export const mysqlHostAndPassword: mysqlConfig = onlineMysqlHostAndPassword;
+// export const mysqlHostAndPassword: mysqlConfig = onlineMysqlHostAndPassword;
 
 /*******************mysql数据库结束*******************/
 
