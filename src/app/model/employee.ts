@@ -17,6 +17,7 @@ export default (app: Application) => {
         description: TEXT,
         gender: {type: INTEGER, allowNull: false, defaultValue: 1},
         leaveOffice: {type: INTEGER, defaultValue: 0}, // 是否离职
+        weblink_admin: {type: INTEGER, defaultValue: 0}, // 管理官网后台
     }, {
         freezeTableName: true
     });

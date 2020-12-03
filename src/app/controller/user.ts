@@ -119,7 +119,7 @@ export class UserController {
   @put('/')
   @normalLog('进行了修改用户信息的操作')
   async updateUser() {
-    const {userId, username, mobile, telphone, head_url, gender, email = '', job_id = '', role = '', joinTime = '', leaveOffice} = this.ctx.request.body;
+    const {userId, username, mobile, telphone, head_url, gender, email = '', job_id = '', role = '', joinTime = '', leaveOffice, weblink_admin} = this.ctx.request.body;
     const data = await this.ctx.model.Employee.findOne({
       where: {user_id: userId}
     });
@@ -150,6 +150,7 @@ export class UserController {
     if (head_url) { data.head_url = head_url; }
     if (gender !== undefined) { data.gender = gender; }
     if (leaveOffice !== undefined) { data.leaveOffice = leaveOffice; }
+    if (weblink_admin !== undefined) { data.weblink_admin = weblink_admin; }
     if (email) {
       const hasEmail = await this.ctx.model.Employee.findOne({where: {email, user_id: {[Op.ne]: userId}}});
       if (!!hasEmail) {
@@ -177,7 +178,7 @@ export class UserController {
   @post('/')
   @normalLog('进行了新增员工的操作')
   async addUser(): Promise<ErrorResult | SuccessResult> {
-    let {headUrl, password, role, email, username, telphone, mobile, joinTime, jobId, gender} = this.ctx.request.body;
+    let {headUrl, password, role, email, username, telphone, mobile, joinTime, jobId, gender, weblink_admin} = this.ctx.request.body;
     joinTime = new Date(joinTime);
     password = md5(password);
     const { Op } = this.ctx.app['Sequelize'];
@@ -194,7 +195,7 @@ export class UserController {
       return this.ctx.body = {status: 500, msg: '姓名或邮箱或手机号重复'} as ErrorResult;
     }
     data = await this.ctx.model.Employee.create({
-      head_url: headUrl, password, role, email, username, telphone, mobile, join_time: joinTime, job_id: jobId, gender, user_id: uuid().replace(/\-/g, '')
+      head_url: headUrl, password, weblink_admin, role, email, username, telphone, mobile, join_time: joinTime, job_id: jobId, gender, user_id: uuid().replace(/\-/g, '')
     });
     this.ctx.body = {status: 0, msg: '员工添加成功', result: data} as SuccessResult;
   }
