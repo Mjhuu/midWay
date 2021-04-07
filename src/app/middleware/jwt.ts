@@ -16,7 +16,7 @@ module.exports = options => {
             ctx.request.ip = clientip;
         }
         /*修改IP结束*/
-        if (ctx.url !== '/' && !ctx.url.includes('/login') && !ctx.url.includes('/captcha')) {
+        if (ctx.url !== '/' && !ctx.url.includes('/chip') && !ctx.url.includes('/login') && !ctx.url.includes('/captcha')) {
             if (!ctx.headers.referer) {
                 return ctx.body = {status: 403, msg: '只能在纬领工作台使用此接口'} as ErrorResult;
             }

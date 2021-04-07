@@ -12,11 +12,18 @@ export class AssessmentController {
 
     @get('/logs')
     async assessmentLogs() {
+        let { page = 1, size = 10 } = this.ctx.query;
+        let offset = (page - 1) * size;
+        size = parseInt(size);
+        offset = offset <= 0 ? 0 : offset;
         let assessments = await this.ctx.model.Assessment.findAll({
+            limit: size,
+            offset: offset,
             order: [
                 ['createdAt', 'DESC']
             ],
         });
+        let total = await this.ctx.model.Assessment.count({});
         let assessmentList = [];
         for(let i in assessments){
             let user_id = assessments[i].user_id;
@@ -30,7 +37,8 @@ export class AssessmentController {
         }
         this.ctx.body = {
             status: 0, msg: '获取成功', result: {
-                assessmentList
+                assessmentList,
+                total
             }
         } as SuccessResult;
     }
@@ -52,6 +60,31 @@ export class AssessmentController {
         // 入库结束
         this.ctx.body = {
             status: 0, msg: '考核记录已入库', result: {}
+        } as SuccessResult;
+    }
+
+    // 获取某用户的月评记录
+    @get('/user')
+    async userAssessments() {
+        const {userid} = this.ctx.headers;
+        const {dateStart, dateEnd, month, year} = this.ctx.query;
+        const { Op } = this.ctx.app['Sequelize'];
+        let assessments = await this.ctx.model.Week.findAll({
+            where: {
+                startweekdate: {
+                    [Op.gte]: dateStart
+                },
+                endweekdate: {
+                    [Op.lte]: dateEnd
+                },
+                evaluated_id: userid
+            }
+        });
+
+        this.ctx.body = {
+            status: 0, msg: '月度考核记录获取成功', result: {
+                assessments, month, year
+            }
         } as SuccessResult;
     }
 

@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>芯片素材整理</title>
+    <link href="/chip/style.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="/chip/jquery.min.js"></script>
+    <script type="text/javascript" src="/chip/jquery.SuperSlide.2.1.1.js"></script>
+</head>
+<body>
+
+<div class="large-content">
+    <div class="large-group clearfix">
+        <h3 class="large-header">
+            <em>芯片素材整理</em>
+        </h3>
+        <div class="large-switch clearfix">
+            <div class="large-switch-circle hd">
+                <ul>
+                    <li class="on">芯片公司</li>
+                    <li>新闻/论坛</li>
+                    <li>高校/科研机构</li>
+                    <li>芯片商城</li>
+                </ul>
+            </div>
+            <div class="large-switch-middle bd">
+                <ul class="clearfix">
+                    {% for company in chipCompany %}
+                    <li class="large-switch-item">
+                        <div class="large-item-img">
+                            <img src="{{company.logo}}" alt="图像加载失败">
+                        </div>
+                        <div class="large-item-title">{{company.name}}</div>
+                        <div class="large-item-text">{{company.desc}}</div>
+                        <a href="{{company.url}}" class="large-item-link" target="_blank">跳转</a>
+                    </li>
+                    {% endfor %}
+                    <li class="large-switch-item-clear">
+                        <div class="large-switch-dx">积极寻找中</div>
+                    </li>
+                </ul>
+                <ul class="clearfix">
+                    {% for item in BBS %}
+                    <li class="large-switch-item">
+                        <div class="large-item-img">
+                            <img src="{{item.logo}}" alt="图像加载失败">
+                        </div>
+                        <div class="large-item-title">{{item.name}}</div>
+                        <div class="large-item-text">{{item.desc}}</div>
+                        <a href="{{item.url}}" class="large-item-link" target="_blank">跳转</a>
+                    </li>
+                    {% endfor %}
+                    <li class="large-switch-item-clear">
+                        <div class="large-switch-dx">积极寻找中</div>
+                    </li>
+                </ul>
+                <ul class="clearfix">
+                    {% for item in colleges %}
+                    <li class="large-switch-item">
+                        <div class="large-item-img">
+                            <img src="{{item.logo}}" alt="图像加载失败">
+                        </div>
+                        <div class="large-item-title">{{item.name}}</div>
+                        <div class="large-item-text">{{item.desc}}</div>
+                        <a href="{{item.url}}" class="large-item-link" target="_blank">跳转</a>
+                    </li>
+                    {% endfor %}
+                    <li class="large-switch-item-clear">
+                        <div class="large-switch-dx">积极寻找中</div>
+                    </li>
+                </ul>
+                <ul class="clearfix">
+                    {% for item in shop %}
+                    <li class="large-switch-item">
+                        <div class="large-item-img">
+                            <img src="{{item.logo}}" alt="图像加载失败">
+                        </div>
+                        <div class="large-item-title">{{item.name}}</div>
+                        <div class="large-item-text">{{item.desc}}</div>
+                        <a href="{{item.url}}" class="large-item-link" target="_blank">跳转</a>
+                    </li>
+                    {% endfor %}
+                    <li class="large-switch-item-clear">
+                        <div class="large-switch-dx">积极寻找中</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    jQuery(".large-switch").slide({
+        autoPlay: false,
+        trigger: "click",
+        delayTime: 1000
+    });
+</script>
+
+</body>
+</html>

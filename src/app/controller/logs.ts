@@ -10,11 +10,18 @@ export class LogsController {
     // 获取日志
     @get('/')
     async getLogs() {
+        let { page = 1, size = 10 } = this.ctx.query;
+        let offset = (page - 1) * size;
+        size = parseInt(size);
+        offset = offset <= 0 ? 0 : offset;
         let logs = await this.ctx.model.Log.findAll({
+            limit: size,
+            offset: offset,
             order: [
                 ['createdAt', 'DESC']
             ],
         });
+        let allCount = await this.ctx.model.Log.count({});
         let logList = [];
         for(let i in logs){
             let user_id = logs[i].user_id;
@@ -28,7 +35,8 @@ export class LogsController {
         }
         this.ctx.body = {
             status: 0, msg: '获取成功', result: {
-                logList
+                logList,
+                total: allCount
             }
         } as SuccessResult;
     }

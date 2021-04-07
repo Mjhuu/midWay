@@ -66,7 +66,7 @@ export default (appInfo: EggAppInfo) => {
   config.session = {
     key: 'WEBLINKON_SESS',
     maxAge: 60 * 1000,  // 1m
-    httpOnly: false,
+    httpOnly: true,
     encrypt: true,
   };
   config.cluster = {
