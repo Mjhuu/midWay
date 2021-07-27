@@ -14,6 +14,9 @@ export interface AddDepartmentOptions {
     department_description: string;
     creator_id: string;
 }
+export declare enum MessageId {
+    meet = "oz-i-4E9t0e2vUhPQYDLJI8YK3FexmPc-9I20udhaQ0"
+}
 /**
  * @description User-Service response
  */

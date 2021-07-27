@@ -18,6 +18,7 @@ export default (app: Application) => {
         gender: {type: INTEGER, allowNull: false, defaultValue: 1},
         leaveOffice: {type: INTEGER, defaultValue: 0}, // 是否离职
         weblink_admin: {type: INTEGER, defaultValue: 0}, // 管理官网后台
+        openId: STRING(100), // 微信小程序绑定的openId
     }, {
         freezeTableName: true
     });

@@ -1,6 +1,6 @@
 import {Context, inject, provide} from 'midway';
 import {IUserService, IUserOptions, LoginOptions, ErrorResult, SuccessResult} from '../interface';
-import md5 from 'blueimp-md5';
+import md5 from 'md5-nodejs';
 
 @provide('userService')
 export class UserService implements IUserService {

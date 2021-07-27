@@ -14,8 +14,9 @@ export class WeekController {
     @get('/')
     async getWeekEvaluate() {
         let {evaluated_id, startweekdate, endweekdate, } = this.ctx.query;
-        startweekdate = new Date(startweekdate);
-        endweekdate = new Date(endweekdate);
+        startweekdate = new Date(decodeURI(startweekdate));
+        endweekdate = new Date(decodeURI(endweekdate));
+        console.log(startweekdate, endweekdate);
         const data = await this.ctx.model.Week.findOne({
             where: {
                 startweekdate, endweekdate, evaluated_id

@@ -18,6 +18,7 @@ export const onlineServerIpAndPort = `http://192.168.0.79:7003`;
 export const onlineServerDomainAndPort = `http://desk.weblinkon.com:7003`;
 // https服务
 export const onlineServerHttpsDomainAndPort = `https://desk.weblinkon.com`;
+export const wxMiniProgrammer = `https://servicewechat.com/wx2efdadeb0747c17a`;
 
 /*******************本机IP以及服务端IP结束*******************/
 
@@ -37,9 +38,9 @@ export const onlineMysqlHostAndPassword: mysqlConfig = {
     password: 'itnihao666',
 }
 // 本地测试环境
-// export const mysqlHostAndPassword: mysqlConfig = localMysqlHostAndPassword;
+export const mysqlHostAndPassword: mysqlConfig = localMysqlHostAndPassword;
 // 线上部署环境
-export const mysqlHostAndPassword: mysqlConfig = onlineMysqlHostAndPassword;
+// export const mysqlHostAndPassword: mysqlConfig = onlineMysqlHostAndPassword;
 
 /*******************mysql数据库结束*******************/
 
@@ -80,3 +81,8 @@ export const sendEmail = (toEmail, title = '', text = '', html = '') => {
     });
 };
 /*******************邮箱配置结束*******************/
+
+/*******************微信小程序开始*******************/
+export const AppID = 'wx2efdadeb0747c17a';
+export const AppSecret = '243192bca718ecfea82b61c67646bea5';
+/*******************微信小程序结束*******************/

@@ -15,6 +15,10 @@ export interface AddDepartmentOptions {
   creator_id: string;
 }
 
+export enum MessageId {
+  meet = "oz-i-4E9t0e2vUhPQYDLJI8YK3FexmPc-9I20udhaQ0"
+}
+
 /**
  * @description User-Service response
  */
