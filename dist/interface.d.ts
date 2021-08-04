@@ -15,7 +15,8 @@ export interface AddDepartmentOptions {
     creator_id: string;
 }
 export declare enum MessageId {
-    meet = "oz-i-4E9t0e2vUhPQYDLJI8YK3FexmPc-9I20udhaQ0"
+    meet = "oz-i-4E9t0e2vUhPQYDLJI8YK3FexmPc-9I20udhaQ0",
+    leave = "tWOEnjcFLQquhs7OxxH5w1K_cse0zCvEFfuKDZinY_E"
 }
 /**
  * @description User-Service response

@@ -40,7 +40,8 @@ export function GetAccess_token() {
 }
 
 // 发送订阅消息
-export function SendMessage({accessToken, openId, templateId, data}) {
+export function SendMessage({accessToken, openId, templateId, data, page = '/pages/meeting/meeting'}) {
+    console.log(data);
     return new Promise((resolve, reject) => {
         request.post({
             url: `https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=${accessToken}`,
@@ -50,8 +51,8 @@ export function SendMessage({accessToken, openId, templateId, data}) {
                 "miniprogram_state": "formal", // developer为开发版；trial为体验版；formal为正式版
                 "lang": "zh_CN",
                 "data": data,
-                "page": "/pages/meeting/meeting"
-            })
+                "page": page
+            }),
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 body = JSON.parse(body);

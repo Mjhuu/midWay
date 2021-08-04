@@ -1,11 +1,12 @@
 import {Context, inject, controller, get, post, provide,} from 'midway';
 import {ErrorResult, IUserService, SuccessResult, MessageId} from '../../interface';
 import {GetOpenid, GetAccess_token, SendMessage} from "../common/wxProgrammer";
-import {AppID} from "../../otherConfig";
+import {AppID, sendEmail} from "../../otherConfig";
 import {Jwt} from "../jwt/jwt";
 import {uuid} from "uuidv4";
 import {JobType, sha1, decrypt} from "../common";
 import WXBizDataCrypt from '../common/wxProgrammer/WXBizDataCrypt'
+import dayjs = require("dayjs");
 
 const md5 = require('md5-nodejs');
 const pushToken = 'weblinkon';
@@ -298,6 +299,119 @@ export class MiniProgrammer {
         }
     }
 
+    sendEmail({notifyEmail, userRes, toUsername, kindLabel, reason, startTime, endTime}){
+        sendEmail(notifyEmail, `${userRes.result['userInfo'].username}正在审请请假`, ``, `亲爱的同事：${toUsername}，你好。<br/>${userRes.result['userInfo'].username}，正在申请请假。<br/>请假原因：${kindLabel}<br/>请假事由：${reason}<br/>请假开始时间：${dayjs(startTime).format('MM/DD HH:mm:ss')}<br/>请假结束时间：${dayjs(endTime).format('MM/DD HH:mm:ss')}<br/><span style="color: #08acee;font-weight:bold;">请立即前往小程序-“请假”模块进行审批。</span><div style="position:relative;zoom:1"><p style="margin: 0">--</p><div><span style="color: rgb(0, 0, 0);">祝好！商祺~</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;纬领办公OA 于</span><span style="color: rgb(0, 0, 128);">&nbsp;</span>${dayjs().format('YYYY年MM月DD日')}</div><div><span style="color: rgb(128, 128, 0);">-----------------------------------------------------------------------------</span></div><div><span style="color: rgb(128, 128, 0);">纬领（青岛）网络安全研究院有限公司</span></div><div><span style="color: rgb(128, 128, 0);">TEL：<span style="border-bottom:1px dashed #ccc;z-index:1" t="7" onclick="return false;" data="（0532）58511027">（0532）58511027</span></span></div><div><span style="color: rgb(128, 128, 0);">Mobile：<span style="border-bottom:1px dashed #ccc;z-index:1" t="7" onclick="return false;" data="13963962166">13963962166</span></span></div><div><span style="color: rgb(128, 128, 0);">微信：yjli<span style="border-bottom:1px dashed #ccc;z-index:1" t="7" onclick="return false;" data="20128877">20128877</span></span></div><div><span style="color: rgb(128, 128, 0);">地址：山东.青岛.市北区.山东路168号时代国际广场1908室</span></div><div><span style="color: rgb(128, 128, 0);">网址：</span><a style="color: rgb(128, 128, 0); text-decoration: underline;"><span style="color: rgb(128, 128, 0);">www.weblinkon.com</span></a> </div><div><span style="color: rgb(128, 128, 0);">------------------------------------------------------------------------------</span></div><div style="clear:both"></div></div>`).then(d => {
+            console.log(d);
+        })
+    }
+
+    async dealAskLeaveList(askLists){
+        let askLeaveList = [];
+        for (let i in askLists) {
+            const firstInfo = askLists[i].firstRole ? await this.ctx.model.Employee.findByPk(askLists[i].firstRole, {
+                attributes: ['username']
+            }) : {username: ''};
+            const secondInfo = await this.ctx.model.Employee.findByPk(askLists[i].secondRole, {
+                attributes: ['username']
+            });
+            const thirdInfo = await this.ctx.model.Employee.findByPk(askLists[i].thirdRole, {
+                attributes: ['username']
+            });
+
+            const userInfo = await this.ctx.model.Employee.findByPk(askLists[i].user_id, {
+                attributes: ['username']
+            });
+            askLeaveList.push({
+                askLeaveInfo: askLists[i],
+                firstInfo,
+                secondInfo,
+                thirdInfo,
+                userInfo
+            })
+        }
+
+        return askLeaveList
+    }
+
+    @post('/agreeLeave')
+    async agreeLeave() {
+        try {
+            const {leave_id, currentSign, user_id, kindLabel, reason, startTime, endTime, secondRole, thirdRole} = this.ctx.request.body;
+            const askLeave = await this.ctx.model.AskForLeave.findOne({
+                where: {
+                    leave_id
+                }
+            });
+            if(!askLeave){
+                return this.ctx.body = {
+                    msg: '批准失败，此记录不存在',
+                    status: 500,
+                } as ErrorResult;
+            }
+            askLeave[currentSign] = 1;
+            await askLeave.save();
+
+            let userRes = await this.service.getUser({id: user_id});
+            let toUsername = '';
+            let notifyEmail = '';
+            if(currentSign === 'firstSign'){
+                const secondRoleRes = await this.service.getUser({id: secondRole});
+                toUsername = secondRoleRes.result['userInfo'].username;
+                notifyEmail = secondRoleRes.result['userInfo'].email;
+            }else if(currentSign === 'secondSign'){
+                const thirdRoleRes = await this.service.getUser({id: thirdRole});
+                toUsername = thirdRoleRes.result['userInfo'].username;
+                notifyEmail = thirdRoleRes.result['userInfo'].email;
+           }else if(currentSign === 'thirdSign') {
+                console.log('请假审核已通过');
+                sendEmail(userRes.result['userInfo'].email, '请假已通过', userRes.result['userInfo'].username + '的请假审核已通过').then(d => {
+                    console.log(d);
+                });
+                let accessToken = await GetAccess_token();
+                SendMessage({
+                    accessToken,
+                    openId: userRes.result['userInfo'].openId,
+                    templateId: MessageId.leave,
+                    page: '/pages/askLeave/askLeave',
+                    data: {
+                        "name1": {
+                            "value": userRes.result['userInfo'].username
+                        },
+                        "thing2": {
+                            "value": `${dayjs(startTime).format('M月D日 H')}-${dayjs(endTime).format('M月D日 H')}`
+                        },
+                        "thing3": {
+                            "value": reason
+                        },
+                        "phrase4": {
+                            "value": kindLabel
+                        },
+                        "phrase5": {
+                            "value": '领导已批准'
+                        }
+                    }
+                }).catch(d => {
+                    console.log(userRes.result['userInfo'].openId, '发送失败', d);
+                });
+            }
+            if(notifyEmail && toUsername){
+                this.sendEmail({
+                    notifyEmail, userRes, toUsername, kindLabel, reason, startTime, endTime
+                })
+            }
+            this.ctx.body = {
+                msg: '批准成功',
+                status: 0,
+            } as SuccessResult;
+        } catch (e) {
+            this.ctx.body = {
+                msg: '批准失败',
+                status: 500,
+                result: e
+            } as ErrorResult;
+        }
+    }
+
     // 通知开会
     @post('/notifyMeeting')
     async notifyMeeting() {
@@ -414,6 +528,170 @@ export class MiniProgrammer {
                     }
                 }
             }
+        }
+    }
+
+    // 获取我的请假记录
+    @get('/getMyAskLeaveList')
+    async getMyAskLeaveList() {
+        try {
+            const user_id = this.ctx.headers.userid;
+
+            let askLists = await this.ctx.model.AskForLeave.findAll({
+                where: {
+                    user_id
+                },
+                order: [
+                    ['createdAt', 'DESC']
+                ],
+            });
+            let askLeaveList = await this.dealAskLeaveList(askLists);
+
+            this.ctx.body = {
+                status: 0,
+                result: askLeaveList,
+                msg: '请假记录获取成功'
+            } as SuccessResult
+        } catch (e) {
+            this.ctx.body = {
+                msg: '我的请假记录获取失败',
+                status: 500,
+                result: e
+            } as ErrorResult;
+        }
+    }
+
+    // 获取需要我审核的记录
+    @get('/getMySignAskLeaveList')
+    async getMySignAskLeaveList() {
+        try {
+            const user_id = this.ctx.headers.userid;
+            const {Op} = this.ctx.app['Sequelize'];
+            let askLists = await this.ctx.model.AskForLeave.findAll({
+                where: {
+                    [Op.or]: [
+                        {firstRole: user_id},
+                        {secondRole: user_id},
+                        {thirdRole: user_id},
+                    ]
+                },
+                order: [
+                    ['createdAt', 'DESC']
+                ],
+            });
+            let askLeaveList = await this.dealAskLeaveList(askLists);
+
+            this.ctx.body = {
+                status: 0,
+                result: askLeaveList,
+                msg: '审核记录获取成功'
+            } as SuccessResult
+        } catch (e) {
+            this.ctx.body = {
+                msg: '我的审核记录获取失败',
+                status: 500,
+                result: e
+            } as ErrorResult;
+        }
+    }
+
+    @post('/addAskLeave')
+    async addAskLeave() {
+        try {
+            const user_id = this.ctx.headers.userid;
+            const {
+                startTime,
+                endTime,
+                firstRole,
+                secondRole,
+                thirdRole,
+                kind,
+                reason,
+                kindLabel
+            } = this.ctx.request.body;
+            console.log({startTime, endTime, firstRole, secondRole, thirdRole, kind, reason, user_id});
+            let notifyEmail = '';
+            let toUsername = '';
+
+            let askLeave = await this.ctx.model.AskForLeave.findOne({
+                where: {
+                    user_id, startTime, endTime
+                }
+            });
+            if (askLeave) {
+                return this.ctx.body = {
+                    msg: '已存在相同请假',
+                    status: 500,
+                } as ErrorResult;
+            }
+
+            let userRes = await this.service.getUser({id: user_id});
+            if (firstRole) {
+                const firstRoleRes = await this.service.getUser({id: firstRole});
+                if (firstRoleRes.status === 0) {
+                    if (firstRoleRes.result['userInfo'].leaveOffice === 1) {
+                        return this.ctx.body = {
+                            msg: '部门经理已离职，请通知管理员修改审核人员',
+                            status: 500,
+                        } as ErrorResult;
+                    } else {
+                        notifyEmail = firstRoleRes.result['userInfo'].email;
+                        toUsername = firstRoleRes.result['userInfo'].username;
+                    }
+                } else {
+                    return this.ctx.body = {
+                        msg: firstRoleRes.msg,
+                        status: 500,
+                    } as ErrorResult;
+                }
+            }
+            const secondRoleRes = await this.service.getUser({id: secondRole});
+            if (secondRoleRes.status === 0) {
+                if (secondRoleRes.result['userInfo'].leaveOffice === 1) {
+                    return this.ctx.body = {
+                        msg: '行政审核员已离职，请通知管理员修改审核人员',
+                        status: 500,
+                    } as ErrorResult;
+                } else {
+                    if (!notifyEmail) {
+                        notifyEmail = secondRoleRes.result['userInfo'].email
+                        toUsername = secondRoleRes.result['userInfo'].username
+                    }
+                }
+            } else {
+                return this.ctx.body = {
+                    msg: secondRoleRes.msg,
+                    status: 500,
+                } as ErrorResult;
+            }
+
+            console.log({notifyEmail});
+            askLeave = await this.ctx.model.AskForLeave.create({
+                leave_id: uuid().replace(/\-/g, ''),
+                user_id,
+                startTime,
+                endTime,
+                kind,
+                reason,
+                firstRole, secondRole, thirdRole,
+            })
+
+            this.ctx.body = {
+                status: 0,
+                msg: '请假审批已发送',
+                result: askLeave
+            } as SuccessResult
+
+            this.sendEmail({
+                notifyEmail, userRes, toUsername, kindLabel, reason, startTime, endTime
+            })
+
+        } catch (e) {
+            this.ctx.body = {
+                msg: '会议列表获取失败',
+                status: 500,
+                result: e
+            } as ErrorResult;
         }
     }
 
