@@ -299,13 +299,20 @@ export class MiniProgrammer {
         }
     }
 
-    sendEmail({notifyEmail, userRes, toUsername, kindLabel, reason, startTime, endTime}){
-        sendEmail(notifyEmail, `${userRes.result['userInfo'].username}正在审请请假`, ``, `亲爱的同事：${toUsername}，你好。<br/>${userRes.result['userInfo'].username}，正在申请请假。<br/>请假原因：${kindLabel}<br/>请假事由：${reason}<br/>请假开始时间：${dayjs(startTime).format('MM/DD HH:mm:ss')}<br/>请假结束时间：${dayjs(endTime).format('MM/DD HH:mm:ss')}<br/><span style="color: #08acee;font-weight:bold;">请立即前往小程序-“请假”模块进行审批。</span><div style="position:relative;zoom:1"><p style="margin: 0">--</p><div><span style="color: rgb(0, 0, 0);">祝好！商祺~</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;纬领办公OA 于</span><span style="color: rgb(0, 0, 128);">&nbsp;</span>${dayjs().format('YYYY年MM月DD日')}</div><div><span style="color: rgb(128, 128, 0);">-----------------------------------------------------------------------------</span></div><div><span style="color: rgb(128, 128, 0);">纬领（青岛）网络安全研究院有限公司</span></div><div><span style="color: rgb(128, 128, 0);">TEL：<span style="border-bottom:1px dashed #ccc;z-index:1" t="7" onclick="return false;" data="（0532）58511027">（0532）58511027</span></span></div><div><span style="color: rgb(128, 128, 0);">Mobile：<span style="border-bottom:1px dashed #ccc;z-index:1" t="7" onclick="return false;" data="13963962166">13963962166</span></span></div><div><span style="color: rgb(128, 128, 0);">微信：yjli<span style="border-bottom:1px dashed #ccc;z-index:1" t="7" onclick="return false;" data="20128877">20128877</span></span></div><div><span style="color: rgb(128, 128, 0);">地址：山东.青岛.市北区.山东路168号时代国际广场1908室</span></div><div><span style="color: rgb(128, 128, 0);">网址：</span><a style="color: rgb(128, 128, 0); text-decoration: underline;"><span style="color: rgb(128, 128, 0);">www.weblinkon.com</span></a> </div><div><span style="color: rgb(128, 128, 0);">------------------------------------------------------------------------------</span></div><div style="clear:both"></div></div>`).then(d => {
-            console.log(d);
-        })
+    sendEmail({notifyEmail, userRes, toUsername, kindLabel = '', reason, startTime = '', endTime = '', retroactiveTime = '', type = 'askLeave'}){
+        if(type === 'retroactive'){
+            sendEmail(notifyEmail, `${userRes.result['userInfo'].username}正在审请补签`, ``, `亲爱的同事：${toUsername}，你好。<br/>${userRes.result['userInfo'].username}，正在申请补签。<br/>补签原因：${reason}<br/>补签时间：${dayjs(retroactiveTime).format('MM/DD HH:mm:ss')}<br/><span style="color: #08acee;font-weight:bold;">请立即前往小程序-“补签”模块进行审批。</span><div style="position:relative;zoom:1"><p style="margin: 0">--</p><div><span style="color: rgb(0, 0, 0);">祝好！商祺~</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;纬领办公OA 于</span><span style="color: rgb(0, 0, 128);">&nbsp;</span>${dayjs().format('YYYY年MM月DD日')}</div><div><span style="color: rgb(128, 128, 0);">-----------------------------------------------------------------------------</span></div><div><span style="color: rgb(128, 128, 0);">纬领（青岛）网络安全研究院有限公司</span></div><div><span style="color: rgb(128, 128, 0);">TEL：<span style="border-bottom:1px dashed #ccc;z-index:1" t="7" onclick="return false;" data="（0532）58511027">（0532）58511027</span></span></div><div><span style="color: rgb(128, 128, 0);">地址：山东.青岛.市北区.山东路168号时代国际广场1908室</span></div><div><span style="color: rgb(128, 128, 0);">网址：</span><a style="color: rgb(128, 128, 0); text-decoration: underline;"><span style="color: rgb(128, 128, 0);">www.weblinkon.com</span></a> </div><div><span style="color: rgb(128, 128, 0);">------------------------------------------------------------------------------</span></div><div style="clear:both"></div></div>`).then(d => {
+                console.log(d);
+            })
+        }else {
+            sendEmail(notifyEmail, `${userRes.result['userInfo'].username}正在审请请假`, ``, `亲爱的同事：${toUsername}，你好。<br/>${userRes.result['userInfo'].username}，正在申请请假。<br/>请假原因：${kindLabel}<br/>请假事由：${reason}<br/>请假开始时间：${dayjs(startTime).format('MM/DD HH:mm:ss')}<br/>请假结束时间：${dayjs(endTime).format('MM/DD HH:mm:ss')}<br/><span style="color: #08acee;font-weight:bold;">请立即前往小程序-“请假”模块进行审批。</span><div style="position:relative;zoom:1"><p style="margin: 0">--</p><div><span style="color: rgb(0, 0, 0);">祝好！商祺~</span></div><div><span style="color: rgb(0, 0, 0);">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;纬领办公OA 于</span><span style="color: rgb(0, 0, 128);">&nbsp;</span>${dayjs().format('YYYY年MM月DD日')}</div><div><span style="color: rgb(128, 128, 0);">-----------------------------------------------------------------------------</span></div><div><span style="color: rgb(128, 128, 0);">纬领（青岛）网络安全研究院有限公司</span></div><div><span style="color: rgb(128, 128, 0);">TEL：<span style="border-bottom:1px dashed #ccc;z-index:1" t="7" onclick="return false;" data="（0532）58511027">（0532）58511027</span></span></div><div><span style="color: rgb(128, 128, 0);">地址：山东.青岛.市北区.山东路168号时代国际广场1908室</span></div><div><span style="color: rgb(128, 128, 0);">网址：</span><a style="color: rgb(128, 128, 0); text-decoration: underline;"><span style="color: rgb(128, 128, 0);">www.weblinkon.com</span></a> </div><div><span style="color: rgb(128, 128, 0);">------------------------------------------------------------------------------</span></div><div style="clear:both"></div></div>`).then(d => {
+                console.log(d);
+            })
+        }
+
     }
 
-    async dealAskLeaveList(askLists){
+    async dealAskLeaveList(askLists, key = 'askLeaveInfo'){
         let askLeaveList = [];
         for (let i in askLists) {
             const firstInfo = askLists[i].firstRole ? await this.ctx.model.Employee.findByPk(askLists[i].firstRole, {
@@ -322,7 +329,7 @@ export class MiniProgrammer {
                 attributes: ['username']
             });
             askLeaveList.push({
-                askLeaveInfo: askLists[i],
+                [key]: askLists[i],
                 firstInfo,
                 secondInfo,
                 thirdInfo,
@@ -397,6 +404,85 @@ export class MiniProgrammer {
             if(notifyEmail && toUsername){
                 this.sendEmail({
                     notifyEmail, userRes, toUsername, kindLabel, reason, startTime, endTime
+                })
+            }
+            this.ctx.body = {
+                msg: '批准成功',
+                status: 0,
+            } as SuccessResult;
+        } catch (e) {
+            this.ctx.body = {
+                msg: '批准失败',
+                status: 500,
+                result: e
+            } as ErrorResult;
+        }
+    }
+
+    @post('/agreeRetroactive')
+    async agreeRetroactive() {
+        try {
+            const {retroactive_id, currentSign, user_id, reason, retroactiveTime, secondRole, thirdRole} = this.ctx.request.body;
+            const retroactive = await this.ctx.model.Retroactive.findOne({
+                where: {
+                    retroactive_id
+                }
+            });
+            if(!retroactive){
+                return this.ctx.body = {
+                    msg: '批准失败，此记录不存在',
+                    status: 500,
+                } as ErrorResult;
+            }
+            retroactive[currentSign] = 1;
+            await retroactive.save();
+
+            let userRes = await this.service.getUser({id: user_id});
+            let toUsername = '';
+            let notifyEmail = '';
+            if(currentSign === 'firstSign'){
+                const secondRoleRes = await this.service.getUser({id: secondRole});
+                toUsername = secondRoleRes.result['userInfo'].username;
+                notifyEmail = secondRoleRes.result['userInfo'].email;
+            }else if(currentSign === 'secondSign'){
+                const thirdRoleRes = await this.service.getUser({id: thirdRole});
+                toUsername = thirdRoleRes.result['userInfo'].username;
+                notifyEmail = thirdRoleRes.result['userInfo'].email;
+           }else if(currentSign === 'thirdSign') {
+                console.log('补签审核已通过');
+                sendEmail(userRes.result['userInfo'].email, '补签已通过', userRes.result['userInfo'].username + '的补签审核已通过').then(d => {
+                    console.log(d);
+                });
+                let accessToken = await GetAccess_token();
+                SendMessage({
+                    accessToken,
+                    openId: userRes.result['userInfo'].openId,
+                    templateId: MessageId.retroactive,
+                    page: '/pages/retroactive/retroactive',
+                    data: {
+                        "name8": {
+                            "value": userRes.result['userInfo'].username
+                        },
+                        "date5": {
+                            "value": `${dayjs(retroactiveTime).format('YYYY年M月D日')}`
+                        },
+                        "date2": {
+                            "value": `${dayjs(retroactiveTime).format('HH:mm')}`
+                        },
+                        "thing6": {
+                            "value": reason
+                        },
+                        "thing11": {
+                            "value": '领导已批准'
+                        }
+                    }
+                }).catch(d => {
+                    console.log(userRes.result['userInfo'].openId, '发送失败', d);
+                });
+            }
+            if(notifyEmail && toUsername){
+                this.sendEmail({
+                    notifyEmail, userRes, toUsername, reason, retroactiveTime, type: 'retroactive'
                 })
             }
             this.ctx.body = {
@@ -561,6 +647,36 @@ export class MiniProgrammer {
         }
     }
 
+    // 获取我的补签记录
+    @get('/getMyRetroactiveList')
+    async getMyRetroactiveList() {
+        try {
+            const user_id = this.ctx.headers.userid;
+
+            let retroactiveLists = await this.ctx.model.Retroactive.findAll({
+                where: {
+                    user_id
+                },
+                order: [
+                    ['createdAt', 'DESC']
+                ],
+            });
+            let retroactiveList = await this.dealAskLeaveList(retroactiveLists, 'retroactiveInfo');
+
+            this.ctx.body = {
+                status: 0,
+                result: retroactiveList,
+                msg: '补签记录获取成功'
+            } as SuccessResult
+        } catch (e) {
+            this.ctx.body = {
+                msg: '我的补签记录获取失败',
+                status: 500,
+                result: e
+            } as ErrorResult;
+        }
+    }
+
     // 获取需要我审核的记录
     @get('/getMySignAskLeaveList')
     async getMySignAskLeaveList() {
@@ -584,6 +700,40 @@ export class MiniProgrammer {
             this.ctx.body = {
                 status: 0,
                 result: askLeaveList,
+                msg: '审核记录获取成功'
+            } as SuccessResult
+        } catch (e) {
+            this.ctx.body = {
+                msg: '我的审核记录获取失败',
+                status: 500,
+                result: e
+            } as ErrorResult;
+        }
+    }
+
+    // 获取需要我审核的记录
+    @get('/getMySignRetroactiveList')
+    async getMySignRetroactiveList() {
+        try {
+            const user_id = this.ctx.headers.userid;
+            const {Op} = this.ctx.app['Sequelize'];
+            let retroactiveLists = await this.ctx.model.Retroactive.findAll({
+                where: {
+                    [Op.or]: [
+                        {firstRole: user_id},
+                        {secondRole: user_id},
+                        {thirdRole: user_id},
+                    ]
+                },
+                order: [
+                    ['createdAt', 'DESC']
+                ],
+            });
+            let retroactiveList = await this.dealAskLeaveList(retroactiveLists, 'retroactiveInfo');
+
+            this.ctx.body = {
+                status: 0,
+                result: retroactiveList,
                 msg: '审核记录获取成功'
             } as SuccessResult
         } catch (e) {
@@ -688,7 +838,103 @@ export class MiniProgrammer {
 
         } catch (e) {
             this.ctx.body = {
-                msg: '会议列表获取失败',
+                msg: '请假审批失败',
+                status: 500,
+                result: e
+            } as ErrorResult;
+        }
+    }
+
+    @post('/addRetroactive')
+    async addRetroactive() {
+        try {
+            const user_id = this.ctx.headers.userid;
+            const {
+                retroactiveTime,
+                firstRole,
+                secondRole,
+                thirdRole,
+                reason,
+            } = this.ctx.request.body;
+            console.log({retroactiveTime, firstRole, secondRole, thirdRole, reason, user_id});
+            let notifyEmail = '';
+            let toUsername = '';
+
+            let retroactive = await this.ctx.model.Retroactive.findOne({
+                where: {
+                    user_id, retroactiveTime
+                }
+            });
+            if (retroactive) {
+                return this.ctx.body = {
+                    msg: '已存在相同补签',
+                    status: 500,
+                } as ErrorResult;
+            }
+
+            let userRes = await this.service.getUser({id: user_id});
+            if (firstRole) {
+                const firstRoleRes = await this.service.getUser({id: firstRole});
+                if (firstRoleRes.status === 0) {
+                    if (firstRoleRes.result['userInfo'].leaveOffice === 1) {
+                        return this.ctx.body = {
+                            msg: '部门经理已离职，请通知管理员修改审核人员',
+                            status: 500,
+                        } as ErrorResult;
+                    } else {
+                        notifyEmail = firstRoleRes.result['userInfo'].email;
+                        toUsername = firstRoleRes.result['userInfo'].username;
+                    }
+                } else {
+                    return this.ctx.body = {
+                        msg: firstRoleRes.msg,
+                        status: 500,
+                    } as ErrorResult;
+                }
+            }
+            const secondRoleRes = await this.service.getUser({id: secondRole});
+            if (secondRoleRes.status === 0) {
+                if (secondRoleRes.result['userInfo'].leaveOffice === 1) {
+                    return this.ctx.body = {
+                        msg: '行政审核员已离职，请通知管理员修改审核人员',
+                        status: 500,
+                    } as ErrorResult;
+                } else {
+                    if (!notifyEmail) {
+                        notifyEmail = secondRoleRes.result['userInfo'].email
+                        toUsername = secondRoleRes.result['userInfo'].username
+                    }
+                }
+            } else {
+                return this.ctx.body = {
+                    msg: secondRoleRes.msg,
+                    status: 500,
+                } as ErrorResult;
+            }
+
+            console.log({notifyEmail});
+            retroactive = await this.ctx.model.Retroactive.create({
+                retroactive_id: uuid().replace(/\-/g, ''),
+                user_id,
+                retroactiveTime,
+                reason,
+                firstRole, secondRole, thirdRole,
+            })
+
+            this.ctx.body = {
+                status: 0,
+                msg: '补签审批已发送',
+                result: retroactive
+            } as SuccessResult
+
+            this.sendEmail({
+                notifyEmail, userRes, toUsername, reason, retroactiveTime,
+                type: "retroactive"
+            })
+
+        } catch (e) {
+            this.ctx.body = {
+                msg: '补签审批失败',
                 status: 500,
                 result: e
             } as ErrorResult;

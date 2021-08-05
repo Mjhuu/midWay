@@ -37,11 +37,11 @@ export const onlineMysqlHostAndPassword: mysqlConfig = {
     host: '192.168.0.75', // 正式环境
     password: 'itnihao666',
 }
-// 本地测试环境
-// export const mysqlHostAndPassword: mysqlConfig = localMysqlHostAndPassword;
+// 本地测试环境与线上部署环境的自动切换
+export const mysqlHostAndPassword: mysqlConfig = process.env.NODE_ENV === 'local' ? localMysqlHostAndPassword : onlineMysqlHostAndPassword;
 // 线上部署环境
-export const mysqlHostAndPassword: mysqlConfig = onlineMysqlHostAndPassword;
-
+// export const mysqlHostAndPassword: mysqlConfig = onlineMysqlHostAndPassword;
+// console.log(process.env.NODE_ENV, '------------------');
 /*******************mysql数据库结束*******************/
 
 

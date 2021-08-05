@@ -18,6 +18,7 @@ export interface AddDepartmentOptions {
 export enum MessageId {
   meet = "oz-i-4E9t0e2vUhPQYDLJI8YK3FexmPc-9I20udhaQ0", // 会议通知
   leave = "tWOEnjcFLQquhs7OxxH5w1K_cse0zCvEFfuKDZinY_E", // 请假审批通知
+  retroactive = "UiuELdUB3T1vzDblhIT5rpz5bBl9QiFhLjnBiyUTwf8", // 补签审批通知
 }
 
 /**

@@ -27,6 +27,11 @@ export class HomeController {
     await this.ctx.render('index');
   }
 
+  @get('/cTa8uIojs8.txt')
+  async txt() {
+    this.ctx.body = 'd102c9ed44d10f1b952bdd7cad332f10'
+  }
+
   @get('/chip')
   async chip() {
     await this.ctx.render('chip', {

@@ -16,7 +16,8 @@ export interface AddDepartmentOptions {
 }
 export declare enum MessageId {
     meet = "oz-i-4E9t0e2vUhPQYDLJI8YK3FexmPc-9I20udhaQ0",
-    leave = "tWOEnjcFLQquhs7OxxH5w1K_cse0zCvEFfuKDZinY_E"
+    leave = "tWOEnjcFLQquhs7OxxH5w1K_cse0zCvEFfuKDZinY_E",
+    retroactive = "UiuELdUB3T1vzDblhIT5rpz5bBl9QiFhLjnBiyUTwf8"
 }
 /**
  * @description User-Service response

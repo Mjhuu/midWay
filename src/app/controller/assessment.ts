@@ -110,7 +110,7 @@ export class AssessmentController {
         // 入库结束
         this.ctx.body = {
             status: 0, msg: '考核记录获取成功', result: {
-                title: `${year}年度${month}月【${dayjs(dateStart).format('YYYY-MM-DD')}--${dayjs(dateEnd).format('YYYY-MM-DD')}】，员工考核记录汇总表`,
+                title: `${year}年度${month}月份 ${dayjs(dateStart).format('MM-DD')}~${dayjs(dateEnd).format('MM-DD')}考核记录`,
                 assessments
             }
         } as SuccessResult;

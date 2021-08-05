@@ -124,6 +124,59 @@ export class DepartmentController {
         }
     }
 
+    @get('/getRetroactiveList')
+    async getRetroactiveList() {
+        try {
+            // 2021-07-01 00:00:00
+            // 2021-07-31 23:59:59
+            const {timeEnd, timeStart} = this.ctx.query;
+            const {Op} = this.ctx.app['Sequelize'];
+            let retroactives = await this.ctx.model.Retroactive.findAll({
+                where: {
+                    retroactiveTime: {[Op.between]: [timeStart,timeEnd ]}
+                },
+                order: [
+                    ['createdAt', 'DESC']
+                ],
+            });
+            let retroactiveList = [];
+            for(let i in retroactives){
+                const userInfo = await this.service.getUser({id: retroactives[i].user_id})
+
+                const firstInfo = retroactives[i].firstRole ? await this.ctx.model.Employee.findByPk(retroactives[i].firstRole, {
+                    attributes: ['username']
+                }) : {username: ''};
+                const secondInfo = await this.ctx.model.Employee.findByPk(retroactives[i].secondRole, {
+                    attributes: ['username']
+                });
+                const thirdInfo = await this.ctx.model.Employee.findByPk(retroactives[i].thirdRole, {
+                    attributes: ['username']
+                });
+
+                retroactiveList.push({
+                    userInfo: userInfo.result['userInfo'],
+                    departmentInfo: userInfo.result['departmentInfo'],
+                    jobInfo: userInfo.result['jobInfo'],
+                    firstInfo,
+                    secondInfo,
+                    thirdInfo,
+                    retroactiveInfo: retroactives[i]
+                })
+            }
+            this.ctx.body = {
+                status: 0,
+                msg: '补签列表获取成功',
+                result: retroactiveList
+            } as SuccessResult
+        } catch (e) {
+            this.ctx.body = {
+                msg: '补签列表获取失败',
+                status: 500,
+                result: e
+            } as ErrorResult;
+        }
+    }
+
     @get('/roleSign')
     async getRoleSign() {
         try {
